@@ -20,6 +20,8 @@ struct ContentView: View {
             testFetchCopyright()
             testFetchSchedualBetweenStations()
             testFetchStationSchedule()
+            testFetchRouteStations()
+            testFetchNearestCity()
         }
     }
     
@@ -89,13 +91,49 @@ struct ContentView: View {
                     client: client,
                     apikey: apikey
                 )
-                print("Fetching station schedule")
+                print("Fetching station schedule...")
                 
                 let stationSchedule = try await service.getStationSchedule(
                     station: "s9600213")
                 print("Successfully fetched station schedule: \(stationSchedule)")
             } catch {
                 print("Error fetching station schedule \(error)")
+            }
+        }
+    }
+    
+    func testFetchRouteStations() {
+        Task {
+            do {
+                let service = RouteStationsService(
+                    client: client,
+                    apikey: apikey
+                )
+                print("Fetching route stations...")
+                
+                let routeStations = try await service.getRouteStations(uid: "SU-536_261028_c26_12")
+                print("Successfully fetched route stations: \(routeStations)")
+                
+            } catch {
+                print("Error fetching route stations \(error)")
+            }
+        }
+    }
+    
+    func testFetchNearestCity() {
+        Task {
+            do {
+                let service = NearestCityService(
+                    client: client,
+                    apikey: apikey)
+                print("Fetching nearest city...")
+                let nearestCity = try await service.getNearestCity(
+                    lat: 59.864177,
+                    lng: 30.319163
+                )
+                print("Successfully fetched nearest city: \(nearestCity)")
+            } catch {
+                print("Error fetching nearest city \(error)")
             }
         }
     }
