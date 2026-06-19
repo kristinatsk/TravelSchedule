@@ -2,6 +2,11 @@ import SwiftUI
 import OpenAPIURLSession
 
 struct ContentView: View {
+    let apikey = "e0940f60-7b86-40f1-ba94-6a70f7d38166"
+    let client = Client(
+        serverURL: try! Servers.Server1.url(),
+        transport: URLSessionTransport()
+    )
     var body: some View {
         VStack {
             Image(systemName: "globe")
@@ -14,19 +19,17 @@ struct ContentView: View {
             testFetchStations()
             testFetchCopyright()
             testFetchSchedualBetweenStations()
+            testFetchStationSchedule()
         }
     }
     
     func testFetchStations() {
         Task {
             do {
-                let client = Client(
-                    serverURL: try Servers.Server1.url(),
-                    transport: URLSessionTransport()
-                )
+    
                 let service = NearestStationsService(
                     client: client,
-                    apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166"
+                    apikey: apikey
                 )
                 print("Fetching stations...")
                 let stations = try await service.getNearestStations(
@@ -44,13 +47,9 @@ struct ContentView: View {
     func testFetchCopyright() {
         Task {
             do {
-                let client = Client(
-                    serverURL: try Servers.Server1.url(),
-                    transport: URLSessionTransport()
-                )
                 let service = CopyrightService(
                     client: client,
-                    apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166"
+                    apikey: apikey
                 )
                 print("Fetching copyright...")
                 let copyright = try await service.getCopyright(
@@ -66,23 +65,37 @@ struct ContentView: View {
     func testFetchSchedualBetweenStations() {
         Task {
             do {
-                let client = Client(
-                    serverURL: try Servers.Server1.url(),
-                    transport: URLSessionTransport()
-                )
                 let service = SchedualBetweenStationsService(
                     client: client,
-                    apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166"
+                    apikey: apikey
                 )
                 print("Fetching schedual between stations...")
                 
                 let schedualBetweenStations = try await service.getSchedualBetweenStations(
-                    from: "c213",
-                    to: "c2"
+                    from: "c146",
+                    to: "c213"
                 )
                 print("Successfully fetched schedual between stations: \(schedualBetweenStations)")
             } catch {
-                print("Error fetching copyright \(error)")
+                print("Error fetching schedual between stations \(error)")
+            }
+        }
+    }
+    
+    func testFetchStationSchedule() {
+        Task {
+            do {
+                let service = StationScheduleService(
+                    client: client,
+                    apikey: apikey
+                )
+                print("Fetching station schedule")
+                
+                let stationSchedule = try await service.getStationSchedule(
+                    station: "s9600213")
+                print("Successfully fetched station schedule: \(stationSchedule)")
+            } catch {
+                print("Error fetching station schedule \(error)")
             }
         }
     }
