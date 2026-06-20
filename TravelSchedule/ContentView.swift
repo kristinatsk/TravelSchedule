@@ -22,6 +22,8 @@ struct ContentView: View {
             testFetchStationSchedule()
             testFetchRouteStations()
             testFetchNearestCity()
+            testFetchCarrierInfo()
+            testFetchAllStations()
         }
     }
     
@@ -54,9 +56,7 @@ struct ContentView: View {
                     apikey: apikey
                 )
                 print("Fetching copyright...")
-                let copyright = try await service.getCopyright(
-                    format: "json"
-                )
+                let copyright = try await service.getCopyright()
                 print("Successfully fetched copyright \(copyright)")
             } catch {
                 print("Error fetching copyright \(error)")
@@ -134,6 +134,39 @@ struct ContentView: View {
                 print("Successfully fetched nearest city: \(nearestCity)")
             } catch {
                 print("Error fetching nearest city \(error)")
+            }
+        }
+    }
+    func testFetchCarrierInfo() {
+        Task {
+            do {
+                let service = CarrierInfoService(
+                    client: client,
+                    apikey: apikey
+                )
+                print("Fetching carrier info ...")
+                
+                let carrierInfo = try await service.getCarrierInfo(code: "112")
+                print("Successfully fetched carrier info \(carrierInfo)")
+            } catch {
+                print("Error fetching carrier info \(error)")
+            }
+        }
+    }
+    
+    func testFetchAllStations() {
+        Task {
+            do {
+                let service = AllStationsService(
+                    client: client,
+                    apikey: apikey
+                )
+                print("Fetching all stations ...")
+                
+                let allStations = try await service.getAllStations()
+                print("Successfully fetched all stations \(allStations)")
+            } catch {
+                print("Error fetching all stations \(error)")
             }
         }
     }
