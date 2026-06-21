@@ -1,10 +1,3 @@
-//
-//  TravelScheduleApp.swift
-//  TravelSchedule
-//
-//  Created by Kristina Kostenko on 15.06.26.
-//
-
 import SwiftUI
 
 @main
