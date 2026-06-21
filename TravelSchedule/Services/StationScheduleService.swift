@@ -9,16 +9,11 @@ protocol StationScheduleServiceProtocol {
 
 final class StationScheduleService: StationScheduleServiceProtocol {
     private let client: Client
-    private let apikey: String
     
-    init(client: Client, apikey: String) {
-        self.client = client
-        self.apikey = apikey
-    }
+    init(client: Client) { self.client = client }
     
     func getStationSchedule(station: String) async throws -> StationSchedule {
         let response = try await client.getStationSchedule(query: .init(
-            apikey: apikey,
             station: station
         ))
         

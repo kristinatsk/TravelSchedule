@@ -11,15 +11,11 @@ protocol AllStationsServiceProtocol {
 final class AllStationsService: AllStationsServiceProtocol {
     
     private let client: Client
-    private let apikey: String
     
-    init(client: Client, apikey: String) {
-        self.client = client
-        self.apikey = apikey
-    }
+    init(client: Client) { self.client = client }
     
     func getAllStations() async throws -> AllStations {
-        let response = try await client.getAllStations(query: .init(apikey: apikey))
+        let response = try await client.getAllStations(query: .init())
         
         let responseBody = try response.ok.body.html
         

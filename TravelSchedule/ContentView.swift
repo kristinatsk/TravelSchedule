@@ -2,10 +2,10 @@ import SwiftUI
 import OpenAPIURLSession
 
 struct ContentView: View {
-    let apikey = "e0940f60-7b86-40f1-ba94-6a70f7d38166"
     let client = Client(
         serverURL: try! Servers.Server1.url(),
-        transport: URLSessionTransport()
+        transport: URLSessionTransport(),
+        middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
     )
     var body: some View {
         VStack {
@@ -31,10 +31,7 @@ struct ContentView: View {
         Task {
             do {
     
-                let service = NearestStationsService(
-                    client: client,
-                    apikey: apikey
-                )
+                let service = NearestStationsService(client: client)
                 print("Fetching stations...")
                 let stations = try await service.getNearestStations(
                     lat: 59.864177,
@@ -51,10 +48,7 @@ struct ContentView: View {
     func testFetchCopyright() {
         Task {
             do {
-                let service = CopyrightService(
-                    client: client,
-                    apikey: apikey
-                )
+                let service = CopyrightService(client: client)
                 print("Fetching copyright...")
                 let copyright = try await service.getCopyright()
                 print("Successfully fetched copyright \(copyright)")
@@ -67,10 +61,7 @@ struct ContentView: View {
     func testFetchSchedualBetweenStations() {
         Task {
             do {
-                let service = SchedualBetweenStationsService(
-                    client: client,
-                    apikey: apikey
-                )
+                let service = SchedualBetweenStationsService(client: client)
                 print("Fetching schedual between stations...")
                 
                 let schedualBetweenStations = try await service.getSchedualBetweenStations(
@@ -87,10 +78,7 @@ struct ContentView: View {
     func testFetchStationSchedule() {
         Task {
             do {
-                let service = StationScheduleService(
-                    client: client,
-                    apikey: apikey
-                )
+                let service = StationScheduleService(client: client)
                 print("Fetching station schedule...")
                 
                 let stationSchedule = try await service.getStationSchedule(
@@ -105,10 +93,7 @@ struct ContentView: View {
     func testFetchRouteStations() {
         Task {
             do {
-                let service = RouteStationsService(
-                    client: client,
-                    apikey: apikey
-                )
+                let service = RouteStationsService(client: client)
                 print("Fetching route stations...")
                 
                 let routeStations = try await service.getRouteStations(uid: "SU-536_261028_c26_12")
@@ -123,9 +108,7 @@ struct ContentView: View {
     func testFetchNearestCity() {
         Task {
             do {
-                let service = NearestCityService(
-                    client: client,
-                    apikey: apikey)
+                let service = NearestCityService(client: client)
                 print("Fetching nearest city...")
                 let nearestCity = try await service.getNearestCity(
                     lat: 59.864177,
@@ -140,10 +123,7 @@ struct ContentView: View {
     func testFetchCarrierInfo() {
         Task {
             do {
-                let service = CarrierInfoService(
-                    client: client,
-                    apikey: apikey
-                )
+                let service = CarrierInfoService(client: client)
                 print("Fetching carrier info ...")
                 
                 let carrierInfo = try await service.getCarrierInfo(code: "112")
@@ -157,14 +137,11 @@ struct ContentView: View {
     func testFetchAllStations() {
         Task {
             do {
-                let service = AllStationsService(
-                    client: client,
-                    apikey: apikey
-                )
+                let service = AllStationsService(client: client)
                 print("Fetching all stations ...")
                 
                 let allStations = try await service.getAllStations()
-                print("Successfully fetched all stations \(allStations)")
+                print("Successfully fetched all stations. Countries count: \(allStations.countries?.count ?? 0)")
             } catch {
                 print("Error fetching all stations \(error)")
             }

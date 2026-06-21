@@ -10,16 +10,11 @@ protocol NearestCityServiceProtocol {
 final class NearestCityService: NearestCityServiceProtocol {
     
     private let client: Client
-    private let apikey: String
     
-    init(client: Client, apikey: String) {
-        self.client = client
-        self.apikey = apikey
-    }
+    init(client: Client) { self.client = client }
     
     func getNearestCity(lat: Double, lng: Double) async throws -> NearestCity {
         let response = try await client.getNearestCity(query: .init(
-            apikey: apikey,
             lat: lat,
             lng: lng
         ))

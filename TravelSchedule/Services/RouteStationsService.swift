@@ -9,15 +9,11 @@ protocol RouteStationsServiceProtocol {
 
 final class RouteStationsService: RouteStationsServiceProtocol {
     private let client: Client
-    private let apikey: String
     
-    init(client: Client, apikey: String) {
-        self.client = client
-        self.apikey = apikey
-    }
+    init(client: Client) { self.client = client }
     
     func getRouteStations(uid: String) async throws -> RouteStations {
-        let response = try await client.getRouteStations(query: .init(apikey: apikey, uid: uid))
+        let response = try await client.getRouteStations(query: .init(uid: uid))
         
         return try response.ok.body.json
     }
