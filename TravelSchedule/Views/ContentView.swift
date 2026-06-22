@@ -7,14 +7,16 @@ struct ContentView: View {
         transport: URLSessionTransport(),
         middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
     )
+    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Group {
+            if hasSeenOnboarding {
+                MainTabView()
+            } else {
+                OnboardingView()
+            }
         }
-        .padding()
         .onAppear {
             testFetchStations()
             testFetchCopyright()
