@@ -2,7 +2,20 @@ import SwiftUI
 
 struct MainTabView: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        TabView() {
+                RouteSearchView()
+            .tabItem {
+                Image(.mainItem)
+                    .renderingMode(.template)
+            }
+            
+                SettingsView()
+            .tabItem {
+                Image(.settingsItem)
+                    .renderingMode(.template)
+            }
+        }
+        .tint(.black)
     }
 }
 
