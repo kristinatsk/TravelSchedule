@@ -1,8 +1,10 @@
 import SwiftUI
+import OpenAPIURLSession
 
 struct RouteSearchView: View {
     @State var departureCity = ""
     @State var arrivalCity = ""
+    let stationsService: AllStationsService
     var body: some View {
         NavigationStack {
             VStack {
@@ -10,7 +12,7 @@ struct RouteSearchView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 14) {
                         NavigationLink {
-                            SelectCityView()
+                            SelectCityView( stationsService: stationsService)
                         } label: {
                             if departureCity.isEmpty {
                                 Text("Откуда")
@@ -21,7 +23,7 @@ struct RouteSearchView: View {
                         }
                         
                         NavigationLink {
-                            SelectCityView()
+                            SelectCityView( stationsService: stationsService)
                         } label: {
                             if arrivalCity.isEmpty {
                                 Text("Куда")
@@ -61,5 +63,14 @@ struct RouteSearchView: View {
 }
 
 #Preview {
-    RouteSearchView()
+    let client = Client(
+        serverURL: try! Servers.Server1.url(),
+        transport: URLSessionTransport(),
+        middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
+        )
+        let service = AllStationsService(client: client)
+    
+    
+    return RouteSearchView(stationsService: service)
+    
 }

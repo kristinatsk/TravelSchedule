@@ -12,7 +12,7 @@ struct ContentView: View {
     var body: some View {
         Group {
             if hasSeenOnboarding {
-                MainTabView()
+                MainTabView(stationsService: AllStationsService(client: client))
             } else {
                 OnboardingView()
             }
