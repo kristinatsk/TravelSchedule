@@ -6,6 +6,8 @@ struct SelectCityView: View {
     @State var searchText = ""
     @State var settlements: [Components.Schemas.Settlement] = []
     @Binding var selectedStation: String
+    @Binding var selectedStationCode: String
+    
     let stationsService: AllStationsService
     var searchResults: [Components.Schemas.Settlement] {
         if searchText.isEmpty {
@@ -33,7 +35,7 @@ struct SelectCityView: View {
                 List {
                     ForEach(searchResults, id: \.self) { city in
                         NavigationLink {
-                            SelectStationView(selectedStation: $selectedStation, stations: city.stations ?? [])
+                            SelectStationView(selectedStation: $selectedStation, selectedStationCode: $selectedStationCode, stations: city.stations ?? [])
                         } label: {
                             Text(city.title ?? "")
                         }
@@ -80,7 +82,7 @@ struct SelectCityView: View {
     let service = AllStationsService(client: client)
     
     return NavigationStack {
-        SelectCityView(selectedStation: .constant(""), stationsService: service)
+        SelectCityView(selectedStation: .constant(""), selectedStationCode: .constant(""),stationsService: service)
     }
     
 }

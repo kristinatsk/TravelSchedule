@@ -2,8 +2,14 @@ import SwiftUI
 import OpenAPIURLSession
 
 struct RouteSearchView: View {
+    let carrierInfoService: CarrierInfoService
+    let schedualBetweenStationsService: SchedualBetweenStationsService
+    
     @State var departureCity = ""
     @State var arrivalCity = ""
+    @State var departureStationCode = ""
+    @State var arrivalStationCode = ""
+    
     let stationsService: AllStationsService
     var body: some View {
         NavigationStack {
@@ -12,7 +18,7 @@ struct RouteSearchView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 14) {
                         NavigationLink {
-                            SelectCityView(selectedStation: $departureCity,  stationsService: stationsService)
+                            SelectCityView(selectedStation: $departureCity,  selectedStationCode: $departureStationCode, stationsService: stationsService)
                         } label: {
                             if departureCity.isEmpty {
                                 Text("Откуда")
@@ -23,7 +29,7 @@ struct RouteSearchView: View {
                         }
                         
                         NavigationLink {
-                            SelectCityView(selectedStation: $arrivalCity, stationsService: stationsService)
+                            SelectCityView(selectedStation: $arrivalCity, selectedStationCode: $arrivalStationCode, stationsService: stationsService)
                         } label: {
                             if arrivalCity.isEmpty {
                                 Text("Куда")
@@ -55,8 +61,32 @@ struct RouteSearchView: View {
                 .background(.blueUniversal)
                 .cornerRadius(20)
                 .padding()
+                
+                if !departureCity.isEmpty && !arrivalCity.isEmpty {
+                    NavigationLink {
+                        CarrierListView(
+                            selectedDepartureStation: departureCity,
+                            selectedArrivalStation: arrivalCity,
+                            departureCode: departureStationCode,
+                            arrivalCode: arrivalStationCode,
+                            carrierInfoService: carrierInfoService,
+                            schedualBetweenStationsService: schedualBetweenStationsService
+                        )
+                    } label: {
+                        Text("Найти")
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 150)
+                            .padding()
+                            .background(.blueUniversal)
+                            .cornerRadius(16)
+                    }
+                }
                 Spacer()
+                
             }
+            
+            
             
         }
     }
@@ -67,10 +97,16 @@ struct RouteSearchView: View {
         serverURL: try! Servers.Server1.url(),
         transport: URLSessionTransport(),
         middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
-        )
-        let service = AllStationsService(client: client)
+    )
+    let service = AllStationsService(client: client)
+    let carrierInfoService = CarrierInfoService(client: client)
+    let schedualBetweenStationsService = SchedualBetweenStationsService(client: client)
     
     
-    return RouteSearchView(stationsService: service)
+    return RouteSearchView(
+        carrierInfoService: carrierInfoService,
+        schedualBetweenStationsService: schedualBetweenStationsService,
+        stationsService: service
+    )
     
 }

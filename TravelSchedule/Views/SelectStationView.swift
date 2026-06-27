@@ -5,6 +5,7 @@ struct SelectStationView: View {
     @Environment(\.dismiss) var dismiss
     @State var searchText = ""
     @Binding var selectedStation: String
+    @Binding var selectedStationCode: String
     
     let stations: [Components.Schemas.Station]
     var searchResults: [Components.Schemas.Station] {
@@ -35,6 +36,7 @@ struct SelectStationView: View {
                     ForEach(searchResults, id: \.self) { station in
                         Button {
                             selectedStation = station.title ?? ""
+                            selectedStationCode = station.codes?.yandex_code ?? ""
                             dismiss()
                         } label: {
                             HStack {
@@ -57,5 +59,5 @@ struct SelectStationView: View {
 }
 
 #Preview {
-    SelectStationView(selectedStation: .constant(""), stations: [])
+    SelectStationView(selectedStation: .constant(""), selectedStationCode: .constant(""), stations: [])
 }
