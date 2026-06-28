@@ -11,43 +11,74 @@ struct CarrierListView: View {
     let schedualBetweenStationsService: SchedualBetweenStationsService
     
     @State var segments: [Components.Schemas.Segment] = []
+    @State var selectedTimes: Set<DepartureTime> = []
+    @State var showTransfers: Bool = true
+    
+    var filteredSegments: [Components.Schemas.Segment] {
+        return segments.filter { segment in
+            let matchTransfers = showTransfers ? true : ((segment.has_transfers ?? false) == false)
+            var matchTime = true
+            if !selectedTimes.isEmpty {
+                if let category = getDepartureTime(from: segment.departure ?? "") {
+                    matchTime = selectedTimes.contains(category)
+                } else {
+                    matchTime = false
+                }
+                
+            }
+            return matchTransfers && matchTime
+        }
+    }
     
     var body: some View {
         VStack {
             Text("\(selectedDepartureStation) -> \(selectedArrivalStation)")
                 .font(.system(size: 24, weight: .bold))
-            ScrollView {
-                VStack (spacing: 14) {
-                    ForEach(segments, id: \.self) { segment in
-                        NavigationLink {
-                            CarrierDetailView(
-                                carrierCode: segment.thread?.carrier?.code ?? 0,
-                                carrierInfoService: carrierInfoService
-                                
-                            )
-                        } label: {
-                            VStack(alignment: .leading, spacing: 18) {
-                                
-                                HStack(alignment: .top) {
-                                    AsyncImage(url: URL(string: segment.thread?.carrier?.logo ?? "")) { image in
+            ZStack(alignment: .bottom) {
+                if filteredSegments.isEmpty {
+                    Text("Вариантов нет")
+                        .font(.system(size: 24, weight: .bold))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        VStack (spacing: 14) {
+                            ForEach(filteredSegments, id: \.self) { segment in
+                                NavigationLink {
+                                    CarrierDetailView(
+                                        carrierCode: segment.thread?.carrier?.code ?? 0,
+                                        carrierInfoService: carrierInfoService
                                         
-                                        image
-                                            .resizable()
-                                            .scaledToFit()
-                                    } placeholder: {
-                                        Color.grayUniversal
-                                    }
-                                        .frame(width: 38, height: 38)
-                                        .cornerRadius(12)
-                                    Text(segment.thread?.carrier?.title ?? "")
-                                        .foregroundColor(.black)
-                                        .font(.system(size: 17, weight: .regular))
+                                    )
+                                } label: {
+                                    VStack(alignment: .leading, spacing: 18) {
                                         
-                                    Spacer()
-                                    Text("14 января")
-                                        .foregroundColor(.black)
-                                        .font(.system(size: 12, weight: .regular))
-                                }
+                                        HStack(alignment: .top) {
+                                            AsyncImage(url: URL(string: segment.thread?.carrier?.logo ?? "")) { image in
+                                                
+                                                image
+                                                    .resizable()
+                                                    .scaledToFit()
+                                            } placeholder: {
+                                                Color.grayUniversal
+                                            }
+                                            .frame(width: 38, height: 38)
+                                            .cornerRadius(12)
+                                            VStack(alignment: .leading) {
+                                                Text(segment.thread?.carrier?.title ?? "")
+                                                    .foregroundColor(.black)
+                                                    .font(.system(size: 17, weight: .regular))
+                                                if segment.has_transfers == true {
+                                                    Text("С пересадкой в Костроме")
+                                                        .font(.system(size: 12, weight: .regular))
+                                                        .foregroundColor(.redUniversal)
+                                                }
+                                            }
+                                            
+                                            Spacer()
+                                            Text("14 января")
+                                                .foregroundColor(.black)
+                                                .font(.system(size: 12, weight: .regular))
+                                        }
                                         HStack {
                                             Text(formatTime(serverDate: segment.departure ?? ""))
                                                 .foregroundColor(.black)
@@ -64,19 +95,46 @@ struct CarrierListView: View {
                                             
                                             Text(formatTime(serverDate: segment.arrival ?? ""))
                                                 .font(.system(size: 17, weight: .regular))
-                                               
+                                            
                                         }
                                         .foregroundColor(.black)
-                                    
+                                        
+                                    }
+                                    .padding()
+                                    .background(.lightGray)
+                                    .cornerRadius(24)
                                 }
-                            .padding()
-                            .background(.lightGray)
-                            .cornerRadius(24)
+                            }
                         }
                     }
+                    .padding(.horizontal)
                 }
+                
+                
+                NavigationLink {
+                    FilterView(
+                        selectedTimes: $selectedTimes,
+                        showTransfers: $showTransfers
+                    )
+                } label: {
+                    HStack {
+                        Text("Уточнить время")
+                        if showTransfers == false || !selectedTimes.isEmpty {
+                            Circle().fill(.redUniversal).frame(width: 8, height: 8)
+                        }
+                        
+                    }
+                    .foregroundColor(.white)
+                    .font(.system(size: 17, weight: .bold))
+                    .frame(maxWidth: .infinity, maxHeight: 60)
+                    .background(.blueUniversal)
+                    .cornerRadius(16)
+                }
+                
+                .padding(16)
             }
-            .padding(.horizontal)
+            
+            
         }
         .task {
             do {
@@ -97,6 +155,22 @@ struct CarrierListView: View {
         let hours = seconds / 3600
         
         return "\(hours) часов"
+    }
+    
+    func getDepartureTime(from departureString: String) -> DepartureTime? {
+        let hourString = String(departureString.prefix(2))
+        guard let hour = Int(hourString) else { return nil }
+        switch hour {
+        case 0...5:
+            return DepartureTime.night
+        case 6...11:
+            return DepartureTime.morning
+        case 12...17:
+            return DepartureTime.afternoon
+        case 18...23:
+            return DepartureTime.evening
+        default: return nil
+        }
     }
 }
 
