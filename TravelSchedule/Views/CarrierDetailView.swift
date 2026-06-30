@@ -4,8 +4,49 @@ import OpenAPIURLSession
 struct CarrierDetailView: View {
     let carrierCode: Int
     let carrierInfoService: CarrierInfoService
+    @State var currentViewState: ViewState = .loading
+    
     var body: some View {
-        Text("CarrierDetailView")
+        Group {
+            switch currentViewState {
+            case .loading:
+                ProgressView()
+            case .success:
+                Text("CarrierDetailView")
+            case .noInternet:
+                VStack {
+                    Image(.noInternet)
+                        .resizable()
+                        .frame(width: 223, height: 223)
+                        .cornerRadius(70)
+                    Text("Нет интернета")
+                        .font(.system(size: 24, weight: .bold))
+                }
+            case .serverError:
+                VStack {
+                    Image(.serverError)
+                        .resizable()
+                        .frame(width: 223, height: 223)
+                        .cornerRadius(70)
+                    Text("Ошибка сервера")
+                        .font(.system(size: 24, weight: .bold))
+                }
+            }
+            
+        }
+        .task {
+            do {
+                try? await Task.sleep(for: .seconds(1))
+                currentViewState = .success
+            } catch {
+                if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
+                    currentViewState = .noInternet
+                } else {
+                    currentViewState = .serverError
+                }
+                print(error.localizedDescription)
+            }
+        }
     }
 }
 
@@ -17,8 +58,8 @@ struct CarrierDetailView: View {
     )
     let service = CarrierInfoService(client: client)
     
-   return CarrierDetailView(
-    carrierCode: 123,
-    carrierInfoService: service
-   )
+    return CarrierDetailView(
+        carrierCode: 123,
+        carrierInfoService: service
+    )
 }
