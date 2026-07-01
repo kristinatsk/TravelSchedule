@@ -4,7 +4,7 @@ import OpenAPIURLSession
 struct CarrierDetailView: View {
     let carrierCode: Int
     let carrierInfoService: CarrierInfoService
-    @State var currentViewState: ViewState = .loading
+    @State private var currentViewState: ViewState = .loading
     
     var body: some View {
         Group {
@@ -18,7 +18,7 @@ struct CarrierDetailView: View {
                     Image(.noInternet)
                         .resizable()
                         .frame(width: 223, height: 223)
-                        .cornerRadius(70)
+                        .clipShape(Circle())
                     Text("Нет интернета")
                         .font(.system(size: 24, weight: .bold))
                 }
@@ -27,7 +27,7 @@ struct CarrierDetailView: View {
                     Image(.serverError)
                         .resizable()
                         .frame(width: 223, height: 223)
-                        .cornerRadius(70)
+                        .clipShape(Circle())
                     Text("Ошибка сервера")
                         .font(.system(size: 24, weight: .bold))
                 }

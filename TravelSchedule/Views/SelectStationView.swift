@@ -3,7 +3,7 @@ import OpenAPIURLSession
 
 struct SelectStationView: View {
     @Environment(\.dismiss) var dismiss
-    @State var searchText = ""
+    @State private var searchText = ""
     @Binding var selectedStation: String
     @Binding var selectedStationCode: String
     
@@ -23,7 +23,7 @@ struct SelectStationView: View {
             }
             .padding()
             .background(.searchBarBackground)
-            .cornerRadius(10)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             .padding(.horizontal)
             if !searchText.isEmpty && searchResults.isEmpty {
                 Spacer()

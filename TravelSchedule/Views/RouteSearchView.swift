@@ -5,10 +5,10 @@ struct RouteSearchView: View {
     let carrierInfoService: CarrierInfoService
     let schedualBetweenStationsService: SchedualBetweenStationsService
     
-    @State var departureCity = ""
-    @State var arrivalCity = ""
-    @State var departureStationCode = ""
-    @State var arrivalStationCode = ""
+    @State private var departureCity = ""
+    @State private var arrivalCity = ""
+    @State private var departureStationCode = ""
+    @State private var arrivalStationCode = ""
     
     let stationsService: AllStationsService
     var body: some View {
@@ -45,7 +45,7 @@ struct RouteSearchView: View {
                     .foregroundColor(.grayUniversal)
                     .padding()
                     .background(.white)
-                    .cornerRadius(20)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
                     .buttonStyle(.plain)
                     
                     Button {
@@ -59,7 +59,7 @@ struct RouteSearchView: View {
                 }
                 .padding()
                 .background(.blueUniversal)
-                .cornerRadius(20)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
                 .padding()
                 
                 if !departureCity.isEmpty && !arrivalCity.isEmpty {
@@ -79,7 +79,7 @@ struct RouteSearchView: View {
                             .frame(width: 150)
                             .padding()
                             .background(.blueUniversal)
-                            .cornerRadius(16)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
                 }
                 Spacer()

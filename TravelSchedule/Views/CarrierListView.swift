@@ -17,10 +17,10 @@ struct CarrierListView: View {
     let carrierInfoService: CarrierInfoService
     let schedualBetweenStationsService: SchedualBetweenStationsService
     
-    @State var segments: [Components.Schemas.Segment] = []
-    @State var selectedTimes: Set<DepartureTime> = []
-    @State var showTransfers: Bool = true
-    @State var currentViewState: ViewState = .loading
+    @State private var segments: [Components.Schemas.Segment] = []
+    @State private var selectedTimes: Set<DepartureTime> = []
+    @State private var showTransfers: Bool = true
+    @State private var currentViewState: ViewState = .loading
     
     var filteredSegments: [Components.Schemas.Segment] {
         return segments.filter { segment in
@@ -74,7 +74,7 @@ struct CarrierListView: View {
                                                         Color.grayUniversal
                                                     }
                                                     .frame(width: 38, height: 38)
-                                                    .cornerRadius(12)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 12))
                                                     VStack(alignment: .leading) {
                                                         Text(segment.thread?.carrier?.title ?? "")
                                                             .foregroundColor(.black)
@@ -114,7 +114,7 @@ struct CarrierListView: View {
                                             }
                                             .padding()
                                             .background(.lightGray)
-                                            .cornerRadius(24)
+                                            .clipShape(RoundedRectangle(cornerRadius: 24))
                                         }
                                     }
                                 }
@@ -140,7 +140,7 @@ struct CarrierListView: View {
                             .font(.system(size: 17, weight: .bold))
                             .frame(maxWidth: .infinity, maxHeight: 60)
                             .background(.blueUniversal)
-                            .cornerRadius(16)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
                         
                         .padding(16)
@@ -152,7 +152,7 @@ struct CarrierListView: View {
                     Image(.serverError)
                         .resizable()
                         .frame(width: 223, height: 223)
-                        .cornerRadius(70)
+                        .clipShape(Circle())
                     Text("Ошибка сервера")
                         .font(.system(size: 24, weight: .bold))
                 }
@@ -161,7 +161,7 @@ struct CarrierListView: View {
                     Image(.noInternet)
                         .resizable()
                         .frame(width: 223, height: 223)
-                        .cornerRadius(70)
+                        .clipShape(Circle())
                     Text("Нет интернета")
                         .font(.system(size: 24, weight: .bold))
                 }

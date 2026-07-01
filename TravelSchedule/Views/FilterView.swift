@@ -79,7 +79,7 @@ struct FilterView: View {
                     .font(.system(size: 17, weight: .bold))
                     .frame(maxWidth: .infinity, maxHeight: 60)
                     .background(.blueUniversal)
-                    .cornerRadius(16)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
             }
         }
         .padding(16)

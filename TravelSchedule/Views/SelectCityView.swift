@@ -3,9 +3,9 @@ import OpenAPIURLSession
 
 struct SelectCityView: View {
     @Environment(\.dismiss) var dismiss
-    @State var searchText = ""
-    @State var settlements: [Components.Schemas.Settlement] = []
-    @State var currentViewState: ViewState = .loading
+    @State private var searchText = ""
+    @State private var settlements: [Components.Schemas.Settlement] = []
+    @State private var currentViewState: ViewState = .loading
     @Binding var selectedStation: String
     @Binding var selectedStationCode: String
     
@@ -38,7 +38,7 @@ struct SelectCityView: View {
                     }
                     .padding()
                     .background(.searchBarBackground)
-                    .cornerRadius(10)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                     if !searchText.isEmpty && searchResults.isEmpty {
                         Spacer()
                         
@@ -67,7 +67,7 @@ struct SelectCityView: View {
                     Image(.serverError)
                         .resizable()
                         .frame(width: 223, height: 223)
-                        .cornerRadius(70)
+                        .clipShape(Circle())
                     Text("Ошибка сервера")
                         .font(.system(size: 24, weight: .bold))
                 }
@@ -76,7 +76,7 @@ struct SelectCityView: View {
                     Image(.noInternet)
                         .resizable()
                         .frame(width: 223, height: 223)
-                        .cornerRadius(70)
+                        .clipShape(Circle())
                     Text("Нет интернета")
                         .font(.system(size: 24, weight: .bold))
                 }
