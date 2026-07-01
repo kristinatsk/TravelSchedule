@@ -22,7 +22,7 @@ struct SelectStationView: View {
                 TextField("Введите запрос", text: $searchText)
             }
             .padding()
-            .background(.lightGray)
+            .background(.searchBarBackground)
             .cornerRadius(10)
             .padding(.horizontal)
             if !searchText.isEmpty && searchResults.isEmpty {
@@ -46,7 +46,7 @@ struct SelectStationView: View {
                             }
                             
                         }
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                     }
                 }
                 

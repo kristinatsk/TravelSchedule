@@ -24,7 +24,7 @@ struct MainTabView: View {
                     .renderingMode(.template)
             }
         }
-        .tint(.black)
+        .tint(.primary)
     }
 }
 

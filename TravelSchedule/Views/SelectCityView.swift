@@ -27,9 +27,17 @@ struct SelectCityView: View {
                     HStack {
                         Image(systemName: "magnifyingglass")
                         TextField("Введите запрос", text: $searchText)
+                        if !searchText.isEmpty {
+                            Button {
+                                searchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.grayUniversal)
+                            }
+                        }
                     }
                     .padding()
-                    .background(.lightGray)
+                    .background(.searchBarBackground)
                     .cornerRadius(10)
                     if !searchText.isEmpty && searchResults.isEmpty {
                         Spacer()
@@ -45,7 +53,7 @@ struct SelectCityView: View {
                                 } label: {
                                     Text(city.title ?? "")
                                 }
-                                .foregroundColor(.black)
+                                .foregroundColor(.primary)
                             }
                         }
                     }

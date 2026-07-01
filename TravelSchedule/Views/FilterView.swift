@@ -36,7 +36,7 @@ struct FilterView: View {
                             Spacer()
                             Image(systemName: selectedTimes.contains(time) ? "checkmark.square.fill" : "square")
                         }
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                     }
                 }
             }
@@ -54,7 +54,7 @@ struct FilterView: View {
                         Spacer()
                         Image(systemName: showTransfers ? "record.circle" : "circle")
                     }
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                 }
                 
                 Button {
@@ -65,7 +65,7 @@ struct FilterView: View {
                         Spacer()
                         Image(systemName: showTransfers ? "circle" : "record.circle")
                     }
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                 }
             }
             
