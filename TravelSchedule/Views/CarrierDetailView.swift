@@ -36,7 +36,7 @@ struct CarrierDetailView: View {
         }
         .task {
             do {
-                try? await Task.sleep(for: .seconds(1))
+                try await Task.sleep(for: .seconds(1))
                 currentViewState = .success
             } catch {
                 if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
@@ -51,8 +51,15 @@ struct CarrierDetailView: View {
 }
 
 #Preview {
+    let safeURL: URL
+    
+    do {
+        safeURL = try Servers.Server1.url()
+    } catch {
+        safeURL = URL(string: "https://yandex.ru")!
+    }
     let client = Client(
-        serverURL: try! Servers.Server1.url(),
+        serverURL: safeURL,
         transport: URLSessionTransport(),
         middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
     )
