@@ -16,7 +16,7 @@ struct RouteSearchView: View {
             VStack {
                 Color.clear.frame(height: 188)
                 HStack {
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 28) {
                         NavigationLink {
                             SelectCityView(selectedStation: $departureCity,  selectedStationCode: $departureStationCode, stationsService: stationsService)
                         } label: {
@@ -38,7 +38,6 @@ struct RouteSearchView: View {
                                     .foregroundColor(.black)
                             }
                         }
-                        
                         
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

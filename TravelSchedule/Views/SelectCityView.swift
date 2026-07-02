@@ -36,9 +36,10 @@ struct SelectCityView: View {
                             }
                         }
                     }
-                    .padding()
+                    .padding(8)
                     .background(.searchBarBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal)
                     if !searchText.isEmpty && searchResults.isEmpty {
                         Spacer()
                         
@@ -48,17 +49,27 @@ struct SelectCityView: View {
                     } else {
                         List {
                             ForEach(searchResults, id: \.self) { city in
-                                NavigationLink {
-                                    SelectStationView(selectedStation: $selectedStation, selectedStationCode: $selectedStationCode, stations: city.stations ?? [])
-                                } label: {
-                                    Text(city.title ?? "")
+                                ZStack {
+                                    HStack {
+                                        Text(city.title ?? "")
+                                            .frame(height: 60)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .foregroundColor(.primary)
+                                    }
+                                    NavigationLink {
+                                        SelectStationView(selectedStation: $selectedStation, selectedStationCode: $selectedStationCode, stations: city.stations ?? [])
+                                    } label: {
+
+                                        Color.clear
+                                    }
                                 }
-                                .foregroundColor(.primary)
+                                .listRowSeparator(.hidden)
+                                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                             }
                         }
                     }
                 }
-                .padding()
                 .listStyle(.plain)
                 .navigationTitle("Выбор города")
                 .navigationBarTitleDisplayMode(.inline)
@@ -79,6 +90,18 @@ struct SelectCityView: View {
                         .clipShape(Circle())
                     Text("Нет интернета")
                         .font(.system(size: 24, weight: .bold))
+                }
+            }
+        }
+        .toolbar(.hidden, for: .tabBar)
+        .navigationBarBackButtonHidden()
+        .toolbar() {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.primary)
                 }
             }
         }

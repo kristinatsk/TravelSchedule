@@ -21,7 +21,7 @@ struct SelectStationView: View {
                 Image(systemName: "magnifyingglass")
                 TextField("Введите запрос", text: $searchText)
             }
-            .padding()
+            .padding(8)
             .background(.searchBarBackground)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .padding(.horizontal)
@@ -41,12 +41,15 @@ struct SelectStationView: View {
                         } label: {
                             HStack {
                                 Text(station.title ?? "")
+                                    .frame(height: 60)
                                 Spacer()
                                 Image(systemName: "chevron.right")
                             }
                             
                         }
                         .foregroundColor(.primary)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                     }
                 }
                 
@@ -55,6 +58,17 @@ struct SelectStationView: View {
         }
         .navigationTitle("Выбор станции")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
+        .toolbar() {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.primary)
+                }
+            }
+        }
     }
 }
 

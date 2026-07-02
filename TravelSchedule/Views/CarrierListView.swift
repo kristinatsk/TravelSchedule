@@ -17,13 +17,14 @@ struct CarrierListView: View {
     let carrierInfoService: CarrierInfoService
     let schedualBetweenStationsService: SchedualBetweenStationsService
     
+    @Environment(\.dismiss) var dismiss
     @State private var segments: [Components.Schemas.Segment] = []
     @State private var selectedTimes: Set<DepartureTime> = []
     @State private var showTransfers: Bool = true
     @State private var currentViewState: ViewState = .loading
     
     var filteredSegments: [Components.Schemas.Segment] {
-        return segments.filter { segment in
+         segments.filter { segment in
             let matchTransfers = showTransfers ? true : ((segment.has_transfers ?? false) == false)
             var matchTime = true
             if !selectedTimes.isEmpty {
@@ -47,6 +48,7 @@ struct CarrierListView: View {
                 VStack {
                     Text("\(selectedDepartureStation) -> \(selectedArrivalStation)")
                         .font(.system(size: 24, weight: .bold))
+                        .padding(16)
                     ZStack(alignment: .bottom) {
                         if filteredSegments.isEmpty {
                             Text("Вариантов нет")
@@ -54,7 +56,7 @@ struct CarrierListView: View {
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                         } else {
                             ScrollView {
-                                VStack (spacing: 14) {
+                                VStack (spacing: 8) {
                                     ForEach(filteredSegments, id: \.self) { segment in
                                         NavigationLink {
                                             CarrierDetailView(
@@ -131,7 +133,7 @@ struct CarrierListView: View {
                         } label: {
                             HStack {
                                 Text("Уточнить время")
-                                if showTransfers == false || !selectedTimes.isEmpty {
+                                if !showTransfers || !selectedTimes.isEmpty {
                                     Circle().fill(.redUniversal).frame(width: 8, height: 8)
                                 }
                                 
@@ -164,6 +166,18 @@ struct CarrierListView: View {
                         .clipShape(Circle())
                     Text("Нет интернета")
                         .font(.system(size: 24, weight: .bold))
+                }
+            }
+        }
+        .toolbar(.hidden, for: .tabBar)
+        .navigationBarBackButtonHidden()
+        .toolbar() {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.primary)
                 }
             }
         }
