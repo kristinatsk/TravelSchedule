@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
+    @AppStorage(Constants.Storage.hasSeenOnboarding) var hasSeenOnboarding = false
     var body: some View {
         Image(.splashScreen)
             .resizable()

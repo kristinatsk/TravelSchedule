@@ -18,7 +18,7 @@ struct SelectStationView: View {
     var body: some View {
         VStack {
             HStack {
-                Image(systemName: "magnifyingglass")
+                Image(systemName: Constants.Icons.magnifyingGlass)
                 TextField("Введите запрос", text: $searchText)
             }
             .padding(8)
@@ -43,7 +43,7 @@ struct SelectStationView: View {
                                 Text(station.title ?? "")
                                     .frame(height: 60)
                                 Spacer()
-                                Image(systemName: "chevron.right")
+                                Image(systemName: Constants.Icons.chevronRight)
                             }
                             
                         }
@@ -64,7 +64,7 @@ struct SelectStationView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: Constants.Icons.chevronLeft)
                         .foregroundColor(.primary)
                 }
             }

@@ -7,7 +7,7 @@ struct ContentView: View {
         transport: URLSessionTransport(),
         middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
     )
-    @AppStorage("hasSeenOnboarding") var hasSeenOnboarding = false
+    @AppStorage(Constants.Storage.hasSeenOnboarding) var hasSeenOnboarding = false
     
     var body: some View {
         Group {

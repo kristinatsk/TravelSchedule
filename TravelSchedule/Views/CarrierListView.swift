@@ -176,7 +176,7 @@ struct CarrierListView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: Constants.Icons.chevronLeft)
                         .foregroundColor(.primary)
                 }
             }

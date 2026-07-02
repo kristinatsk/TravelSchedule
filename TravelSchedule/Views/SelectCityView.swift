@@ -25,13 +25,13 @@ struct SelectCityView: View {
             case .success:
                 VStack {
                     HStack {
-                        Image(systemName: "magnifyingglass")
+                        Image(systemName: Constants.Icons.magnifyingGlass)
                         TextField("Введите запрос", text: $searchText)
                         if !searchText.isEmpty {
                             Button {
                                 searchText = ""
                             } label: {
-                                Image(systemName: "xmark.circle.fill")
+                                Image(systemName: Constants.Icons.xmark)
                                     .foregroundColor(.grayUniversal)
                             }
                         }
@@ -54,7 +54,7 @@ struct SelectCityView: View {
                                         Text(city.title ?? "")
                                             .frame(height: 60)
                                         Spacer()
-                                        Image(systemName: "chevron.right")
+                                        Image(systemName: Constants.Icons.chevronRight)
                                             .foregroundColor(.primary)
                                     }
                                     NavigationLink {
@@ -100,7 +100,7 @@ struct SelectCityView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: Constants.Icons.chevronLeft)
                         .foregroundColor(.primary)
                 }
             }

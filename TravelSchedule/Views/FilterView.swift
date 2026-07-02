@@ -34,7 +34,7 @@ struct FilterView: View {
                         HStack {
                             Text(time.rawValue)
                             Spacer()
-                            Image(systemName: selectedTimes.contains(time) ? "checkmark.square.fill" : "square")
+                            Image(systemName: selectedTimes.contains(time) ? Constants.Icons.checkmark : Constants.Icons.square)
                         }
                         .foregroundColor(.primary)
                     }
@@ -52,7 +52,7 @@ struct FilterView: View {
                     HStack {
                         Text("Да")
                         Spacer()
-                        Image(systemName: showTransfers ? "record.circle" : "circle")
+                        Image(systemName: showTransfers ? Constants.Icons.recordCircle : Constants.Icons.circle)
                     }
                     .foregroundColor(.primary)
                 }
@@ -63,7 +63,7 @@ struct FilterView: View {
                     HStack {
                         Text("Нет")
                         Spacer()
-                        Image(systemName: showTransfers ? "circle" : "record.circle")
+                        Image(systemName: showTransfers ? Constants.Icons.circle : Constants.Icons.recordCircle)
                     }
                     .foregroundColor(.primary)
                 }
