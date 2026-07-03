@@ -7,18 +7,24 @@ struct ContentView: View {
         transport: URLSessionTransport(),
         middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
     )
+    @AppStorage(Constants.Storage.hasSeenOnboarding) var hasSeenOnboarding = false
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Group {
+            if hasSeenOnboarding {
+                MainTabView(
+                    stationsService: AllStationsService(client: client),
+                    carrierInfoService: CarrierInfoService(client: client),
+                    scheduleBetweenStationsService: ScheduleBetweenStationsService(client: client)
+                )
+            } else {
+                OnboardingView()
+            }
         }
-        .padding()
         .onAppear {
             testFetchStations()
             testFetchCopyright()
-            testFetchSchedualBetweenStations()
+            testFetchScheduleBetweenStations()
             testFetchStationSchedule()
             testFetchRouteStations()
             testFetchNearestCity()
@@ -58,19 +64,19 @@ struct ContentView: View {
         }
     }
     
-    func testFetchSchedualBetweenStations() {
+    func testFetchScheduleBetweenStations() {
         Task {
             do {
-                let service = SchedualBetweenStationsService(client: client)
-                print("Fetching schedual between stations...")
+                let service = ScheduleBetweenStationsService(client: client)
+                print("Fetching schedule between stations...")
                 
-                let schedualBetweenStations = try await service.getSchedualBetweenStations(
+                let scheduleBetweenStations = try await service.getScheduleBetweenStations(
                     from: "c146",
                     to: "c213"
                 )
-                print("Successfully fetched schedual between stations: \(schedualBetweenStations)")
+                print("Successfully fetched schedule between stations: \(scheduleBetweenStations)")
             } catch {
-                print("Error fetching schedual between stations \(error)")
+                print("Error fetching schedule between stations \(error)")
             }
         }
     }

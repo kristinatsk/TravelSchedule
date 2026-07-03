@@ -1,0 +1,254 @@
+import SwiftUI
+import OpenAPIURLSession
+
+enum ViewState {
+    case loading
+    case success
+    case noInternet
+    case serverError
+}
+
+struct CarrierListView: View {
+    
+    let selectedDepartureStation: String
+    let selectedArrivalStation: String
+    let departureCode: String
+    let arrivalCode: String
+    let carrierInfoService: CarrierInfoService
+    let scheduleBetweenStationsService: ScheduleBetweenStationsService
+    
+    @Environment(\.dismiss) var dismiss
+    @State private var segments: [Components.Schemas.Segment] = []
+    @State private var selectedTimes: Set<DepartureTime> = []
+    @State private var showTransfers: Bool = true
+    @State private var currentViewState: ViewState = .loading
+    
+    var filteredSegments: [Components.Schemas.Segment] {
+         segments.filter { segment in
+            let matchTransfers = showTransfers ? true : ((segment.has_transfers ?? false) == false)
+            var matchTime = true
+            if !selectedTimes.isEmpty {
+                if let category = getDepartureTime(from: segment.departure ?? "") {
+                    matchTime = selectedTimes.contains(category)
+                } else {
+                    matchTime = false
+                }
+                
+            }
+            return matchTransfers && matchTime
+        }
+    }
+    
+    var body: some View {
+        Group {
+            switch currentViewState {
+            case .loading:
+                ProgressView()
+            case .success:
+                VStack {
+                    Text("\(selectedDepartureStation) -> \(selectedArrivalStation)")
+                        .font(.system(size: 24, weight: .bold))
+                        .padding(16)
+                    ZStack(alignment: .bottom) {
+                        if filteredSegments.isEmpty {
+                            Text("Вариантов нет")
+                                .font(.system(size: 24, weight: .bold))
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        } else {
+                            ScrollView {
+                                VStack (spacing: 8) {
+                                    ForEach(filteredSegments, id: \.self) { segment in
+                                        NavigationLink {
+                                            CarrierDetailView(
+                                                carrierCode: segment.thread?.carrier?.code ?? 0,
+                                                carrierInfoService: carrierInfoService
+                                                
+                                            )
+                                        } label: {
+                                            VStack(alignment: .leading, spacing: 18) {
+                                                HStack(alignment: .top) {
+                                                    AsyncImage(url: URL(string: segment.thread?.carrier?.logo ?? "")) { image in
+                                                        
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFit()
+                                                    } placeholder: {
+                                                        Color.grayUniversal
+                                                    }
+                                                    .frame(width: 38, height: 38)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                    VStack(alignment: .leading) {
+                                                        Text(segment.thread?.carrier?.title ?? "")
+                                                            .foregroundColor(.black)
+                                                            .font(.system(size: 17, weight: .regular))
+                                                        if segment.has_transfers == true {
+                                                            Text("С пересадкой в Костроме")
+                                                                .font(.system(size: 12, weight: .regular))
+                                                                .foregroundColor(.redUniversal)
+                                                        }
+                                                    }
+                                                    
+                                                    Spacer()
+                                                    Text("14 января")
+                                                        .foregroundColor(.black)
+                                                        .font(.system(size: 12, weight: .regular))
+                                                }
+                                                HStack {
+                                                    Text(formatTime(serverDate: segment.departure ?? ""))
+                                                        .foregroundColor(.black)
+                                                        .font(.system(size: 17, weight: .regular))
+                                                    Rectangle()
+                                                        .frame(height: 1)
+                                                        .foregroundColor(.black)
+                                                    
+                                                    Text(formatDuration(seconds: segment.duration ?? 0))
+                                                        .font(.system(size: 12, weight: .regular))
+                                                    Rectangle()
+                                                        .frame(height: 1)
+                                                        .foregroundColor(.black)
+                                                    
+                                                    Text(formatTime(serverDate: segment.arrival ?? ""))
+                                                        .font(.system(size: 17, weight: .regular))
+                                                    
+                                                }
+                                                .foregroundColor(.black)
+                                                
+                                            }
+                                            .padding()
+                                            .background(.lightGray)
+                                            .clipShape(RoundedRectangle(cornerRadius: 24))
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        
+                        
+                        NavigationLink {
+                            FilterView(
+                                selectedTimes: $selectedTimes,
+                                showTransfers: $showTransfers
+                            )
+                        } label: {
+                            HStack {
+                                Text("Уточнить время")
+                                if !showTransfers || !selectedTimes.isEmpty {
+                                    Circle().fill(.redUniversal).frame(width: 8, height: 8)
+                                }
+                                
+                            }
+                            .foregroundColor(.white)
+                            .font(.system(size: 17, weight: .bold))
+                            .frame(maxWidth: .infinity, maxHeight: 60)
+                            .background(.blueUniversal)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                        }
+                        
+                        .padding(16)
+                    }
+                    
+                }
+            case .serverError:
+                VStack {
+                    Image(.serverError)
+                        .resizable()
+                        .frame(width: 223, height: 223)
+                        .clipShape(Circle())
+                    Text("Ошибка сервера")
+                        .font(.system(size: 24, weight: .bold))
+                }
+            case .noInternet:
+                VStack {
+                    Image(.noInternet)
+                        .resizable()
+                        .frame(width: 223, height: 223)
+                        .clipShape(Circle())
+                    Text("Нет интернета")
+                        .font(.system(size: 24, weight: .bold))
+                }
+            }
+        }
+        .toolbar(.hidden, for: .tabBar)
+        .navigationBarBackButtonHidden()
+        .toolbar() {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: Constants.Icons.chevronLeft)
+                        .foregroundColor(.primary)
+                }
+            }
+        }
+        .task {
+            do {
+                let response = try await scheduleBetweenStationsService.getScheduleBetweenStations(from: departureCode, to: arrivalCode)
+                let fetchedSegments = response.segments
+                segments = fetchedSegments ?? []
+                currentViewState = .success
+            } catch {
+                if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
+                    currentViewState = .noInternet
+                } else {
+                    currentViewState = .serverError
+                }
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    func formatTime(serverDate: String) -> String {
+        return String(serverDate.prefix(5))
+    }
+    
+    func formatDuration(seconds: Int) -> String {
+        let hours = seconds / 3600
+        
+        return "\(hours) часов"
+    }
+    
+    func getDepartureTime(from departureString: String) -> DepartureTime? {
+        let hourString = String(departureString.prefix(2))
+        guard let hour = Int(hourString) else { return nil }
+        switch hour {
+        case 0...5:
+            return DepartureTime.night
+        case 6...11:
+            return DepartureTime.morning
+        case 12...17:
+            return DepartureTime.afternoon
+        case 18...23:
+            return DepartureTime.evening
+        default: return nil
+        }
+    }
+}
+
+#Preview {
+    let safeURL: URL
+    
+    do {
+        safeURL = try Servers.Server1.url()
+    } catch {
+        safeURL = URL(string: "https://yandex.ru")!
+    }
+    
+    let client = Client(
+        serverURL: safeURL,
+        transport: URLSessionTransport(),
+        middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
+    )
+    
+    let service = CarrierInfoService(client: client)
+    let scheduleService = ScheduleBetweenStationsService(client: client)
+    
+    return CarrierListView(
+        selectedDepartureStation: "Москва",
+        selectedArrivalStation: "Санкт-Петербург",
+        departureCode: "c146",
+        arrivalCode: "c213",
+        carrierInfoService: service,
+        scheduleBetweenStationsService: scheduleService
+    )
+}
