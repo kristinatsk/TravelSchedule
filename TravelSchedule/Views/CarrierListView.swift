@@ -15,7 +15,7 @@ struct CarrierListView: View {
     let departureCode: String
     let arrivalCode: String
     let carrierInfoService: CarrierInfoService
-    let schedualBetweenStationsService: SchedualBetweenStationsService
+    let scheduleBetweenStationsService: ScheduleBetweenStationsService
     
     @Environment(\.dismiss) var dismiss
     @State private var segments: [Components.Schemas.Segment] = []
@@ -183,7 +183,7 @@ struct CarrierListView: View {
         }
         .task {
             do {
-                let response = try await schedualBetweenStationsService.getSchedualBetweenStations(from: departureCode, to: arrivalCode)
+                let response = try await scheduleBetweenStationsService.getScheduleBetweenStations(from: departureCode, to: arrivalCode)
                 let fetchedSegments = response.segments
                 segments = fetchedSegments ?? []
                 currentViewState = .success
@@ -241,7 +241,7 @@ struct CarrierListView: View {
     )
     
     let service = CarrierInfoService(client: client)
-    let schedualService = SchedualBetweenStationsService(client: client)
+    let scheduleService = ScheduleBetweenStationsService(client: client)
     
     return CarrierListView(
         selectedDepartureStation: "Москва",
@@ -249,6 +249,6 @@ struct CarrierListView: View {
         departureCode: "c146",
         arrivalCode: "c213",
         carrierInfoService: service,
-        schedualBetweenStationsService: schedualService
+        scheduleBetweenStationsService: scheduleService
     )
 }

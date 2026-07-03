@@ -3,7 +3,7 @@ import OpenAPIURLSession
 
 struct RouteSearchView: View {
     let carrierInfoService: CarrierInfoService
-    let schedualBetweenStationsService: SchedualBetweenStationsService
+    let scheduleBetweenStationsService: ScheduleBetweenStationsService
     
     @State private var departureCity = ""
     @State private var arrivalCity = ""
@@ -69,7 +69,7 @@ struct RouteSearchView: View {
                             departureCode: departureStationCode,
                             arrivalCode: arrivalStationCode,
                             carrierInfoService: carrierInfoService,
-                            schedualBetweenStationsService: schedualBetweenStationsService
+                            scheduleBetweenStationsService: scheduleBetweenStationsService
                         )
                     } label: {
                         Text("Найти")
@@ -108,12 +108,12 @@ struct RouteSearchView: View {
     
     let service = AllStationsService(client: client)
     let carrierInfoService = CarrierInfoService(client: client)
-    let schedualBetweenStationsService = SchedualBetweenStationsService(client: client)
+    let scheduleBetweenStationsService = ScheduleBetweenStationsService(client: client)
     
     
     return RouteSearchView(
         carrierInfoService: carrierInfoService,
-        schedualBetweenStationsService: schedualBetweenStationsService,
+        scheduleBetweenStationsService: scheduleBetweenStationsService,
         stationsService: service
     )
     

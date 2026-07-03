@@ -15,7 +15,7 @@ struct ContentView: View {
                 MainTabView(
                     stationsService: AllStationsService(client: client),
                     carrierInfoService: CarrierInfoService(client: client),
-                    schedualBetweenStationsService: SchedualBetweenStationsService(client: client)
+                    scheduleBetweenStationsService: ScheduleBetweenStationsService(client: client)
                 )
             } else {
                 OnboardingView()
@@ -24,7 +24,7 @@ struct ContentView: View {
         .onAppear {
             testFetchStations()
             testFetchCopyright()
-            testFetchSchedualBetweenStations()
+            testFetchScheduleBetweenStations()
             testFetchStationSchedule()
             testFetchRouteStations()
             testFetchNearestCity()
@@ -64,19 +64,19 @@ struct ContentView: View {
         }
     }
     
-    func testFetchSchedualBetweenStations() {
+    func testFetchScheduleBetweenStations() {
         Task {
             do {
-                let service = SchedualBetweenStationsService(client: client)
-                print("Fetching schedual between stations...")
+                let service = ScheduleBetweenStationsService(client: client)
+                print("Fetching schedule between stations...")
                 
-                let schedualBetweenStations = try await service.getSchedualBetweenStations(
+                let scheduleBetweenStations = try await service.getScheduleBetweenStations(
                     from: "c146",
                     to: "c213"
                 )
-                print("Successfully fetched schedual between stations: \(schedualBetweenStations)")
+                print("Successfully fetched schedule between stations: \(scheduleBetweenStations)")
             } catch {
-                print("Error fetching schedual between stations \(error)")
+                print("Error fetching schedule between stations \(error)")
             }
         }
     }

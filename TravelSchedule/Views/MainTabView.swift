@@ -4,13 +4,13 @@ import OpenAPIURLSession
 struct MainTabView: View {
     let stationsService: AllStationsService
     let carrierInfoService: CarrierInfoService
-    let schedualBetweenStationsService: SchedualBetweenStationsService
+    let scheduleBetweenStationsService: ScheduleBetweenStationsService
     
     var body: some View {
         TabView() {
             RouteSearchView(
                 carrierInfoService: carrierInfoService,
-                schedualBetweenStationsService: schedualBetweenStationsService,
+                scheduleBetweenStationsService: scheduleBetweenStationsService,
                 stationsService: stationsService
             )
             .tabItem {
@@ -45,13 +45,13 @@ struct MainTabView: View {
     
         let service = AllStationsService(client: client)
         let carrierInfoService = CarrierInfoService(client: client)
-        let schedualBetweenStationsService = SchedualBetweenStationsService(client: client)
+        let scheduleBetweenStationsService = ScheduleBetweenStationsService(client: client)
     
     
     return MainTabView(
         stationsService: service,
         carrierInfoService: carrierInfoService,
-        schedualBetweenStationsService: schedualBetweenStationsService
+        scheduleBetweenStationsService: scheduleBetweenStationsService
     )
     
 }
