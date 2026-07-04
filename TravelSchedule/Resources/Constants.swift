@@ -3,6 +3,7 @@ import Foundation
 enum Constants {
     enum Storage {
         static let hasSeenOnboarding = "hasSeenOnboarding"
+        static let isDarkMode = "isDarkMode"
     }
     
     enum Icons {
