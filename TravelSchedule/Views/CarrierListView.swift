@@ -14,7 +14,6 @@ struct CarrierListView: View {
     let selectedArrivalStation: String
     let departureCode: String
     let arrivalCode: String
-    let carrierInfoService: CarrierInfoService
     let scheduleBetweenStationsService: ScheduleBetweenStationsService
     
     @Environment(\.dismiss) var dismiss
@@ -24,7 +23,7 @@ struct CarrierListView: View {
     @State private var currentViewState: ViewState = .loading
     
     var filteredSegments: [Components.Schemas.Segment] {
-         segments.filter { segment in
+        segments.filter { segment in
             let matchTransfers = showTransfers ? true : ((segment.has_transfers ?? false) == false)
             var matchTime = true
             if !selectedTimes.isEmpty {
@@ -58,65 +57,63 @@ struct CarrierListView: View {
                             ScrollView {
                                 VStack (spacing: 8) {
                                     ForEach(filteredSegments, id: \.self) { segment in
-                                        NavigationLink {
-                                            CarrierDetailView(
-                                                carrierCode: segment.thread?.carrier?.code ?? 0,
-                                                carrierInfoService: carrierInfoService
-                                                
-                                            )
-                                        } label: {
-                                            VStack(alignment: .leading, spacing: 18) {
-                                                HStack(alignment: .top) {
-                                                    AsyncImage(url: URL(string: segment.thread?.carrier?.logo ?? "")) { image in
+                                        if let carrier = segment.thread?.carrier {
+                                            NavigationLink {
+                                                CarrierDetailView(carrier: carrier)
+                                            } label: {
+                                                VStack(alignment: .leading, spacing: 18) {
+                                                    HStack(alignment: .top) {
+                                                        AsyncImage(url: URL(string: segment.thread?.carrier?.logo ?? "")) { image in
+                                                            
+                                                            image
+                                                                .resizable()
+                                                                .scaledToFit()
+                                                        } placeholder: {
+                                                            Color.grayUniversal
+                                                        }
+                                                        .frame(width: 38, height: 38)
+                                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                                        VStack(alignment: .leading) {
+                                                            Text(segment.thread?.carrier?.title ?? "")
+                                                                .foregroundColor(.black)
+                                                                .font(.system(size: 17, weight: .regular))
+                                                            if segment.has_transfers == true {
+                                                                Text("С пересадкой в Костроме")
+                                                                    .font(.system(size: 12, weight: .regular))
+                                                                    .foregroundColor(.redUniversal)
+                                                            }
+                                                        }
                                                         
-                                                        image
-                                                            .resizable()
-                                                            .scaledToFit()
-                                                    } placeholder: {
-                                                        Color.grayUniversal
+                                                        Spacer()
+                                                        Text("14 января")
+                                                            .foregroundColor(.black)
+                                                            .font(.system(size: 12, weight: .regular))
                                                     }
-                                                    .frame(width: 38, height: 38)
-                                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                                    VStack(alignment: .leading) {
-                                                        Text(segment.thread?.carrier?.title ?? "")
+                                                    HStack {
+                                                        Text(formatTime(serverDate: segment.departure ?? ""))
                                                             .foregroundColor(.black)
                                                             .font(.system(size: 17, weight: .regular))
-                                                        if segment.has_transfers == true {
-                                                            Text("С пересадкой в Костроме")
-                                                                .font(.system(size: 12, weight: .regular))
-                                                                .foregroundColor(.redUniversal)
-                                                        }
+                                                        Rectangle()
+                                                            .frame(height: 1)
+                                                            .foregroundColor(.black)
+                                                        
+                                                        Text(formatDuration(seconds: segment.duration ?? 0))
+                                                            .font(.system(size: 12, weight: .regular))
+                                                        Rectangle()
+                                                            .frame(height: 1)
+                                                            .foregroundColor(.black)
+                                                        
+                                                        Text(formatTime(serverDate: segment.arrival ?? ""))
+                                                            .font(.system(size: 17, weight: .regular))
+                                                        
                                                     }
-                                                    
-                                                    Spacer()
-                                                    Text("14 января")
-                                                        .foregroundColor(.black)
-                                                        .font(.system(size: 12, weight: .regular))
-                                                }
-                                                HStack {
-                                                    Text(formatTime(serverDate: segment.departure ?? ""))
-                                                        .foregroundColor(.black)
-                                                        .font(.system(size: 17, weight: .regular))
-                                                    Rectangle()
-                                                        .frame(height: 1)
-                                                        .foregroundColor(.black)
-                                                    
-                                                    Text(formatDuration(seconds: segment.duration ?? 0))
-                                                        .font(.system(size: 12, weight: .regular))
-                                                    Rectangle()
-                                                        .frame(height: 1)
-                                                        .foregroundColor(.black)
-                                                    
-                                                    Text(formatTime(serverDate: segment.arrival ?? ""))
-                                                        .font(.system(size: 17, weight: .regular))
+                                                    .foregroundColor(.black)
                                                     
                                                 }
-                                                .foregroundColor(.black)
-                                                
+                                                .padding()
+                                                .background(.lightGray)
+                                                .clipShape(RoundedRectangle(cornerRadius: 24))
                                             }
-                                            .padding()
-                                            .background(.lightGray)
-                                            .clipShape(RoundedRectangle(cornerRadius: 24))
                                         }
                                     }
                                 }
@@ -226,13 +223,9 @@ struct CarrierListView: View {
 }
 
 #Preview {
-    let safeURL: URL
     
-    do {
-        safeURL = try Servers.Server1.url()
-    } catch {
-        safeURL = URL(string: "https://yandex.ru")!
-    }
+    let fallbackURL = URL(string: "https://yandex.ru") ?? URL(fileURLWithPath: "/")
+    let safeURL = (try? Servers.Server1.url()) ?? fallbackURL
     
     let client = Client(
         serverURL: safeURL,
@@ -240,15 +233,13 @@ struct CarrierListView: View {
         middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
     )
     
-    let service = CarrierInfoService(client: client)
     let scheduleService = ScheduleBetweenStationsService(client: client)
     
-    return CarrierListView(
+    CarrierListView(
         selectedDepartureStation: "Москва",
         selectedArrivalStation: "Санкт-Петербург",
         departureCode: "c146",
         arrivalCode: "c213",
-        carrierInfoService: service,
         scheduleBetweenStationsService: scheduleService
     )
 }

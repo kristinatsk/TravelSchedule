@@ -68,7 +68,6 @@ struct RouteSearchView: View {
                             selectedArrivalStation: arrivalCity,
                             departureCode: departureStationCode,
                             arrivalCode: arrivalStationCode,
-                            carrierInfoService: carrierInfoService,
                             scheduleBetweenStationsService: scheduleBetweenStationsService
                         )
                     } label: {
