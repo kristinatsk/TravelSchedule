@@ -155,6 +155,7 @@ struct CarrierListView: View {
                     Text("Ошибка сервера")
                         .font(.system(size: 24, weight: .bold))
                 }
+                Divider()
             case .noInternet:
                 VStack {
                     Image(.noInternet)
@@ -164,6 +165,7 @@ struct CarrierListView: View {
                     Text("Нет интернета")
                         .font(.system(size: 24, weight: .bold))
                 }
+                Divider()
             }
         }
         .toolbar(.hidden, for: .tabBar)

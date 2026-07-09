@@ -1,14 +1,14 @@
 import SwiftUI
 
 struct StoriesView: View {
-    let stories: [Story]
     private var timerConfiguration: TimerConfiguration { .init(storiesCount: stories.count)}
     @Environment(\.dismiss) var dismiss
     @State private var currentStoryIndex: Int
     @State private var currentProgress: CGFloat = 0
+    @Binding var stories: [Story]
     
-    init(stories: [Story], initialIndex: Int) {
-        self.stories = stories
+    init(stories: Binding<[Story]>, initialIndex: Int) {
+        self._stories = stories
         self._currentStoryIndex = State(initialValue: initialIndex)
     }
     
@@ -17,6 +17,7 @@ struct StoriesView: View {
             StoriesTabView(stories: stories, currentStoryIndex: $currentStoryIndex)
                 .onChange(of: currentStoryIndex) { oldValue, newValue in
                     didChangeCurrentIndex(oldIndex: oldValue, newIndex: newValue)
+                    markStoryAsSeen(at: currentStoryIndex)
                 }
             CloseButton(action: { dismiss() })
                 .padding(.top, 57)
@@ -49,8 +50,13 @@ struct StoriesView: View {
             currentStoryIndex = index
         }
     }
+    
+    private func markStoryAsSeen(at index: Int) {
+        guard stories.indices.contains(index) else { return }
+        stories[index].hasSeen = true
+    }
 }
 
 #Preview {
-    StoriesView(stories: Story.mockData, initialIndex: 0)
+    StoriesView(stories: .constant(Story.mockData), initialIndex: 0)
 }

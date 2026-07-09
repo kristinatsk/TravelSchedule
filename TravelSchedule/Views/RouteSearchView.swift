@@ -119,11 +119,12 @@ struct RouteSearchView: View {
                     }
                 }
                 Spacer()
+                Divider()
                 
             }
             .fullScreenCover(item: $selectedStory) { story in
                 let index = Story.mockData.firstIndex(where: { $0.id == story.id}) ?? 0
-                StoriesView(stories: Story.mockData, initialIndex: index)
+                StoriesView(stories: $stories, initialIndex: index)
                 
             }
             

@@ -37,6 +37,7 @@ struct SettingsView: View {
                 .font(.system(size: 12, weight: .regular))
                 .foregroundColor(.primary)
                 .padding(.bottom, 24)
+                Divider()
 
             }
         }
