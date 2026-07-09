@@ -9,12 +9,50 @@ struct RouteSearchView: View {
     @State private var arrivalCity = ""
     @State private var departureStationCode = ""
     @State private var arrivalStationCode = ""
+    @State private var selectedStory: Story?
+    @State private var stories = Story.mockData
     
     let stationsService: AllStationsService
     var body: some View {
         NavigationStack {
             VStack {
-                Color.clear.frame(height: 188)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(stories) { story in
+                            ZStack(alignment: .bottomLeading) {
+                                Image(story.backgroundImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 92, height: 140)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                
+                                    .opacity(story.hasSeen ? 0.5 : 1.0)
+                                    .overlay {
+                                        if !story.hasSeen {
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(Color.blueUniversal, lineWidth: 4)
+                                        }
+                                    }
+                                VStack {
+                                    Text(story.title)
+                                        .font(.system(size: 12, weight: .regular))
+                                        .lineLimit(3)
+                                        .foregroundColor(.white)
+                                        .frame(width: 76, height: 45)
+                                        .padding(.leading, 4)
+                                        .padding(.bottom, 8)
+                                }
+                                .onTapGesture {
+                                    selectedStory = story
+                                    let index = stories.firstIndex(where: { $0.id == story.id}) ?? 0
+                                    stories[index].hasSeen = true
+                                }
+                                
+                            }
+                        }
+                    }
+                    .padding()
+                }
                 HStack {
                     VStack(alignment: .leading, spacing: 28) {
                         NavigationLink {
@@ -68,7 +106,6 @@ struct RouteSearchView: View {
                             selectedArrivalStation: arrivalCity,
                             departureCode: departureStationCode,
                             arrivalCode: arrivalStationCode,
-                            carrierInfoService: carrierInfoService,
                             scheduleBetweenStationsService: scheduleBetweenStationsService
                         )
                     } label: {
@@ -82,9 +119,14 @@ struct RouteSearchView: View {
                     }
                 }
                 Spacer()
+                Divider()
                 
             }
-            
+            .fullScreenCover(item: $selectedStory) { story in
+                let index = Story.mockData.firstIndex(where: { $0.id == story.id}) ?? 0
+                StoriesView(stories: $stories, initialIndex: index)
+                
+            }
             
             
         }

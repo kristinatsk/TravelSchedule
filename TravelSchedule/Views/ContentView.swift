@@ -8,6 +8,7 @@ struct ContentView: View {
         middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
     )
     @AppStorage(Constants.Storage.hasSeenOnboarding) var hasSeenOnboarding = false
+    @AppStorage(Constants.Storage.isDarkMode) var isDarkMode = false
     
     var body: some View {
         Group {
@@ -21,6 +22,7 @@ struct ContentView: View {
                 OnboardingView()
             }
         }
+        .preferredColorScheme(isDarkMode ? .dark : .light)
         .onAppear {
             testFetchStations()
             testFetchCopyright()

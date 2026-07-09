@@ -1,72 +1,64 @@
 import SwiftUI
 import OpenAPIURLSession
 
+
 struct CarrierDetailView: View {
-    let carrierCode: Int
-    let carrierInfoService: CarrierInfoService
-    @State private var currentViewState: ViewState = .loading
+    let carrier: Components.Schemas.Carrier
     
     var body: some View {
-        Group {
-            switch currentViewState {
-            case .loading:
-                ProgressView()
-            case .success:
-                Text("CarrierDetailView")
-            case .noInternet:
-                VStack {
-                    Image(.noInternet)
+        VStack(alignment: .leading) {
+            HStack {
+                Spacer()
+                
+                AsyncImage(url: URL(string: carrier.logo ?? "")) { image in
+                    image
                         .resizable()
-                        .frame(width: 223, height: 223)
-                        .clipShape(Circle())
-                    Text("Нет интернета")
-                        .font(.system(size: 24, weight: .bold))
+                        .scaledToFit()
+                } placeholder: {
+                    Color.grayUniversal
                 }
-            case .serverError:
-                VStack {
-                    Image(.serverError)
-                        .resizable()
-                        .frame(width: 223, height: 223)
-                        .clipShape(Circle())
-                    Text("Ошибка сервера")
-                        .font(.system(size: 24, weight: .bold))
-                }
+                .frame(height: 104)
+                Spacer()
             }
             
-        }
-        .task {
-            do {
-                try await Task.sleep(for: .seconds(1))
-                currentViewState = .success
-            } catch {
-                if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                    currentViewState = .noInternet
-                } else {
-                    currentViewState = .serverError
+            VStack(alignment: .leading, spacing: 24) {
+                
+                Text(carrier.title ?? "")
+                    .font(.system(size: 24, weight: .bold))
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("E-mail")
+                        .font(.system(size: 17, weight: .regular))
+                    Text(carrier.email ?? "")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.blueUniversal)
                 }
-                print(error.localizedDescription)
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Телефон")
+                        .font(.system(size: 17, weight: .regular))
+                    Text(carrier.phone ?? "")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.blueUniversal)
+                }
             }
+            Spacer()
         }
+        .padding(16)
+        .navigationTitle("Информация о перевозчике")
+        .navigationBarTitleDisplayMode(.inline)
+        
     }
 }
 
 #Preview {
-    let safeURL: URL
-    
-    do {
-        safeURL = try Servers.Server1.url()
-    } catch {
-        safeURL = URL(string: "https://yandex.ru")!
-    }
-    let client = Client(
-        serverURL: safeURL,
-        transport: URLSessionTransport(),
-        middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
-    )
-    let service = CarrierInfoService(client: client)
-    
-    return CarrierDetailView(
-        carrierCode: 123,
-        carrierInfoService: service
+    CarrierDetailView(
+        carrier: Components.Schemas.Carrier(
+            code: 112,
+            title: "ОАО «РЖД»",
+            phone: "+7 (904) 329-27-71",
+            logo: "https://yastat.net/s3/rasp/media/data/company/logo/rzhd.jpg",
+            email: "i.lozgkina@yandex.ru"
+        )
     )
 }
