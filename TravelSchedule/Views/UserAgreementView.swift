@@ -27,6 +27,7 @@ struct UserAgreementView: View {
                 }
             }
             .navigationTitle("Пользовательское соглашение")
+            .toolbar(.hidden, for: .tabBar)
     }
 }
 
