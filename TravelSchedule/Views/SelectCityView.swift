@@ -6,6 +6,7 @@ struct SelectCityView: View {
     @State private var searchText = ""
     @State private var settlements: [Components.Schemas.Settlement] = []
     @State private var currentViewState: ViewState = .loading
+    @State private var viewModel: CitiesViewModel
     @Binding var selectedStation: String
     @Binding var selectedStationCode: String
     
@@ -58,7 +59,7 @@ struct SelectCityView: View {
                                             .foregroundColor(.primary)
                                     }
                                     NavigationLink {
-                                        SelectStationView(selectedStation: $selectedStation, selectedStationCode: $selectedStationCode, stations: city.stations ?? [])
+                                        SelectStationView(selectedStation: $selectedStation, selectedStationCode: $selectedStationCode, service: stationsService)
                                     } label: {
 
                                         Color.clear

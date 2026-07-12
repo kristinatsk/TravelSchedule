@@ -7,13 +7,13 @@ protocol CopyrightServiceProtocol {
     func getCopyright() async throws -> Copyright
 }
 
-final class CopyrightService: CopyrightServiceProtocol {
+actor CopyrightService: CopyrightServiceProtocol {
     private let client: Client
     
     init(client: Client) { self.client = client }
     
     func getCopyright() async throws -> Copyright {
         let response = try await client.getCopyright(query: .init())
-        return try response.ok.body.json
+        return try await response.ok.body.json
     }
 }

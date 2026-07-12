@@ -1,13 +1,12 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage(Constants.Storage.isDarkMode) var isDarkMode = false
-    
+    @State private var viewModel = SettingsViewModel()
     var body: some View {
         NavigationStack {
             VStack {
                 List {
-                    Toggle("Темная тема", isOn: $isDarkMode)
+                    Toggle("Темная тема", isOn: $viewModel.isDarkMode)
                         .tint(.blueUniversal)
                         .padding(.vertical, 9)
                     ZStack {

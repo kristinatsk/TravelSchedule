@@ -3,29 +3,27 @@ import OpenAPIURLSession
 
 struct SelectStationView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var searchText = ""
+    @State private var viewModel: StationsViewModel
     @Binding var selectedStation: String
     @Binding var selectedStationCode: String
     
-    let stations: [Components.Schemas.Station]
-    var searchResults: [Components.Schemas.Station] {
-        if searchText.isEmpty {
-            stations
-        } else {
-            stations.filter { station in (station.title ?? "").localizedCaseInsensitiveContains(searchText)}
-        }
+    init(service: AllStationsServiceProtocol, selectedStation: Binding<String>, selectedStationCode: Binding<String>) {
+        self._viewModel = State(initialValue: StationsViewModel(allStationsService: service))
+        self._selectedStation = selectedStation
+        self._selectedStationCode = selectedStationCode
     }
+
     var body: some View {
         VStack {
             HStack {
                 Image(systemName: Constants.Icons.magnifyingGlass)
-                TextField("Введите запрос", text: $searchText)
+                TextField("Введите запрос", text: $viewModel.searchText)
             }
             .padding(8)
             .background(.searchBarBackground)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .padding(.horizontal)
-            if !searchText.isEmpty && searchResults.isEmpty {
+            if !viewModel.searchText.isEmpty && viewModel.searchResults.isEmpty {
                 Spacer()
                 
                 Text("Станция не найдена")
@@ -33,7 +31,7 @@ struct SelectStationView: View {
                 Spacer()
             } else {
                 List {
-                    ForEach(searchResults, id: \.self) { station in
+                    ForEach(viewModel.searchResults, id: \.self) { station in
                         Button {
                             selectedStation = station.title ?? ""
                             selectedStationCode = station.codes?.yandex_code ?? ""
@@ -69,9 +67,12 @@ struct SelectStationView: View {
                 }
             }
         }
+        .onAppear {
+            viewModel.fetchStations()
+        }
     }
 }
 
-#Preview {
-    SelectStationView(selectedStation: .constant(""), selectedStationCode: .constant(""), stations: [])
-}
+//#Preview {
+//    SelectStationView(selectedStation: .constant(""), selectedStationCode: .constant(""))
+//}
