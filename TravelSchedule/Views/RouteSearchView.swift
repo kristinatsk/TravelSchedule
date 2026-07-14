@@ -2,23 +2,23 @@ import SwiftUI
 import OpenAPIURLSession
 
 struct RouteSearchView: View {
-    let carrierInfoService: CarrierInfoService
-    let scheduleBetweenStationsService: ScheduleBetweenStationsService
+    @State private var viewModel: RouteSearchViewModel
     
-    @State private var departureCity = ""
-    @State private var arrivalCity = ""
-    @State private var departureStationCode = ""
-    @State private var arrivalStationCode = ""
-    @State private var selectedStory: Story?
-    @State private var stories = Story.mockData
+    init(stationsService: AllStationsServiceProtocol, carrierInfoService: CarrierInfoServiceProtocol, scheduleBetweenStationsService: ScheduleBetweenStationsServiceProtocol) {
+        self._viewModel = State(
+            initialValue:
+                RouteSearchViewModel(carrierInfoService: carrierInfoService,
+                                     scheduleBetweenStationsService: scheduleBetweenStationsService,
+                                     stationsService: stationsService
+                                    ))
+    }
     
-    let stationsService: AllStationsService
     var body: some View {
         NavigationStack {
             VStack {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        ForEach(stories) { story in
+                        ForEach(viewModel.stories) { story in
                             ZStack(alignment: .bottomLeading) {
                                 Image(story.backgroundImage)
                                     .resizable()
@@ -43,9 +43,9 @@ struct RouteSearchView: View {
                                         .padding(.bottom, 8)
                                 }
                                 .onTapGesture {
-                                    selectedStory = story
-                                    let index = stories.firstIndex(where: { $0.id == story.id}) ?? 0
-                                    stories[index].hasSeen = true
+                                    viewModel.selectedStory = story
+                                    let index = viewModel.stories.firstIndex(where: { $0.id == story.id}) ?? 0
+                                    viewModel.stories[index].hasSeen = true
                                 }
                                 
                             }
@@ -56,23 +56,23 @@ struct RouteSearchView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 28) {
                         NavigationLink {
-                            SelectCityView(selectedStation: $departureCity,  selectedStationCode: $departureStationCode, stationsService: stationsService)
+                            SelectCityView(service: viewModel.stationsService, selectedStation: $viewModel.departureCity,  selectedStationCode: $viewModel.departureStationCode)
                         } label: {
-                            if departureCity.isEmpty {
+                            if viewModel.departureCity.isEmpty {
                                 Text("Откуда")
                             } else {
-                                Text(departureCity)
+                                Text(viewModel.departureCity)
                                     .foregroundColor(.black)
                             }
                         }
                         
                         NavigationLink {
-                            SelectCityView(selectedStation: $arrivalCity, selectedStationCode: $arrivalStationCode, stationsService: stationsService)
+                            SelectCityView(service: viewModel.stationsService, selectedStation: $viewModel.arrivalCity, selectedStationCode: $viewModel.arrivalStationCode)
                         } label: {
-                            if arrivalCity.isEmpty {
+                            if viewModel.arrivalCity.isEmpty {
                                 Text("Куда")
                             } else {
-                                Text(arrivalCity)
+                                Text(viewModel.arrivalCity)
                                     .foregroundColor(.black)
                             }
                         }
@@ -86,7 +86,7 @@ struct RouteSearchView: View {
                     .buttonStyle(.plain)
                     
                     Button {
-                        (departureCity, arrivalCity) = (arrivalCity, departureCity)
+                        viewModel.reverseRoute()
                     } label: {
                         Image(.сhange)
                             .foregroundColor(.white)
@@ -99,14 +99,14 @@ struct RouteSearchView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .padding()
                 
-                if !departureCity.isEmpty && !arrivalCity.isEmpty {
+                if !viewModel.departureCity.isEmpty && !viewModel.arrivalCity.isEmpty {
                     NavigationLink {
                         CarrierListView(
-                            selectedDepartureStation: departureCity,
-                            selectedArrivalStation: arrivalCity,
-                            departureCode: departureStationCode,
-                            arrivalCode: arrivalStationCode,
-                            scheduleBetweenStationsService: scheduleBetweenStationsService
+                            selectedDepartureStation: viewModel.departureCity,
+                            selectedArrivalStation: viewModel.arrivalCity,
+                            departureCode: viewModel.departureStationCode,
+                            arrivalCode: viewModel.arrivalStationCode,
+                            scheduleBetweenStationsService: viewModel.scheduleBetweenStationsService
                         )
                     } label: {
                         Text("Найти")
@@ -122,9 +122,9 @@ struct RouteSearchView: View {
                 Divider()
                 
             }
-            .fullScreenCover(item: $selectedStory) { story in
+            .fullScreenCover(item: $viewModel.selectedStory) { story in
                 let index = Story.mockData.firstIndex(where: { $0.id == story.id}) ?? 0
-                StoriesView(stories: $stories, initialIndex: index)
+                StoriesView(stories: $viewModel.stories, initialIndex: index)
                 
             }
             
@@ -134,13 +134,8 @@ struct RouteSearchView: View {
 }
 
 #Preview {
-    let safeURL: URL
+    let safeURL = URL(string: "https://yandex.ru")!
     
-    do {
-        safeURL = try Servers.Server1.url()
-    } catch {
-        safeURL = URL(string: "https://yandex.ru")!
-    }
     
     let client = Client(
         serverURL: safeURL,
@@ -153,10 +148,9 @@ struct RouteSearchView: View {
     let scheduleBetweenStationsService = ScheduleBetweenStationsService(client: client)
     
     
-    return RouteSearchView(
-        carrierInfoService: carrierInfoService,
-        scheduleBetweenStationsService: scheduleBetweenStationsService,
-        stationsService: service
+     RouteSearchView(
+        stationsService: service, carrierInfoService: carrierInfoService,
+        scheduleBetweenStationsService: scheduleBetweenStationsService
     )
     
 }
