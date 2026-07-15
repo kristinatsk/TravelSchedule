@@ -56,7 +56,7 @@ struct RouteSearchView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 28) {
                         NavigationLink {
-                            SelectCityView(service: viewModel.stationsService, selectedStation: $viewModel.departureCity,  selectedStationCode: $viewModel.departureStationCode)
+                            SelectCityView(service:  viewModel.stationsService, selectedStation: $viewModel.departureCity,  selectedStationCode: $viewModel.departureStationCode)
                         } label: {
                             if viewModel.departureCity.isEmpty {
                                 Text("Откуда")
@@ -102,11 +102,11 @@ struct RouteSearchView: View {
                 if !viewModel.departureCity.isEmpty && !viewModel.arrivalCity.isEmpty {
                     NavigationLink {
                         CarrierListView(
+                            scheduleBetweenStationsService: viewModel.scheduleBetweenStationsService,
                             selectedDepartureStation: viewModel.departureCity,
                             selectedArrivalStation: viewModel.arrivalCity,
                             departureCode: viewModel.departureStationCode,
-                            arrivalCode: viewModel.arrivalStationCode,
-                            scheduleBetweenStationsService: viewModel.scheduleBetweenStationsService
+                            arrivalCode: viewModel.arrivalStationCode
                         )
                     } label: {
                         Text("Найти")

@@ -12,7 +12,7 @@ struct SelectStationView: View {
         self._selectedStation = selectedStation
         self._selectedStationCode = selectedStationCode
     }
-
+    
     var body: some View {
         VStack {
             HStack {
@@ -73,6 +73,17 @@ struct SelectStationView: View {
     }
 }
 
-//#Preview {
-//    SelectStationView(selectedStation: .constant(""), selectedStationCode: .constant(""))
-//}
+#Preview {
+    let safeURL = URL(string: "https://yandex.ru")!
+    
+    let client = Client(
+        serverURL: safeURL,
+        transport: URLSessionTransport(),
+        middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
+    )
+    let service = AllStationsService(client: client)
+    
+    NavigationStack {
+        SelectStationView(service: service, selectedStation: .constant(""), selectedStationCode: .constant(""))
+    }
+}
