@@ -24,14 +24,22 @@ struct StoriesView: View {
                 .padding(.top, 57)
                 .padding(.trailing, 12)
             StoriesProgressBar(
-                storiesCount: stories.count,
-                timerConfiguration: viewModel.timerConfiguration,
-                currentProgress: $viewModel.currentProgress
+                currentProgress: $viewModel.currentProgress,
+                storiesCount: stories.count
             )
             .padding(.init(top: 28, leading: 12, bottom: 12, trailing: 12))
             .onChange(of: viewModel.currentProgress) { _, newValue in
                 viewModel.didChangeCurrentProgress(newProgress: newValue)
             }
+        }
+        .onAppear {
+            viewModel.startTimer()
+        }
+        .onDisappear {
+            viewModel.stopTimer()
+        }
+        .onReceive(viewModel.timer) { _ in
+            viewModel.timerTick()
         }
     }
     

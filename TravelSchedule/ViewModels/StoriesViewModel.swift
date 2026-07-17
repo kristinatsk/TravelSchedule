@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 @Observable
 final class StoriesViewModel {
@@ -6,11 +7,14 @@ final class StoriesViewModel {
     var currentProgress: CGFloat
     var storiesCount: Int
     var timerConfiguration: TimerConfiguration { .init(storiesCount: storiesCount)}
+    var timer: Timer.TimerPublisher
+    var cancellable: Cancellable?
     
     init(currentStoryIndex: Int, currentProgress: CGFloat, storiesCount: Int) {
         self.currentStoryIndex = currentStoryIndex
         self.currentProgress = currentProgress
         self.storiesCount = storiesCount
+        self.timer = Self.makeTimer(configuration: self.timerConfiguration)
     }
     
     func didChangeCurrentIndex(oldIndex: Int, newIndex: Int) {
@@ -29,5 +33,25 @@ final class StoriesViewModel {
             currentStoryIndex = index
         }
     }
+    
+    static func makeTimer(configuration: TimerConfiguration) -> Timer.TimerPublisher {
+        Timer.publish(every: configuration.timerTickInterval, on: .main, in: .common)
+    }
+    
+    
+    func timerTick() {
+        withAnimation {
+            currentProgress = timerConfiguration.nextProgress(progress: currentProgress)
+        }
+    }
+    
+    func startTimer() {
+        cancellable = timer.connect()
+    }
+    
+    func stopTimer() {
+        cancellable?.cancel()
+    }
+    
 }
 
