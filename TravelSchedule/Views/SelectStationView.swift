@@ -3,27 +3,38 @@ import OpenAPIURLSession
 
 struct SelectStationView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var viewModel: StationsViewModel
+    @State private var searchText = ""
     @Binding var selectedStation: String
     @Binding var selectedStationCode: String
     
-    init(service: AllStationsServiceProtocol, selectedStation: Binding<String>, selectedStationCode: Binding<String>) {
-        self._viewModel = State(initialValue: StationsViewModel(allStationsService: service))
+    let stations: [Components.Schemas.Station]
+    
+    
+    init(stations: [Components.Schemas.Station], selectedStation: Binding<String>, selectedStationCode: Binding<String>) {
+        self.stations = stations
         self._selectedStation = selectedStation
         self._selectedStationCode = selectedStationCode
+    }
+    
+    var searchResults: [Components.Schemas.Station] {
+        if searchText.isEmpty {
+            stations
+        } else {
+            stations.filter { station in (station.title ?? "").localizedCaseInsensitiveContains(searchText) }
+        }
     }
     
     var body: some View {
         VStack {
             HStack {
                 Image(systemName: Constants.Icons.magnifyingGlass)
-                TextField("Введите запрос", text: $viewModel.searchText)
+                TextField("Введите запрос", text: $searchText)
             }
             .padding(8)
             .background(.searchBarBackground)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .padding(.horizontal)
-            if !viewModel.searchText.isEmpty && viewModel.searchResults.isEmpty {
+            if !searchText.isEmpty && searchResults.isEmpty {
                 Spacer()
                 
                 Text("Станция не найдена")
@@ -31,7 +42,7 @@ struct SelectStationView: View {
                 Spacer()
             } else {
                 List {
-                    ForEach(viewModel.searchResults, id: \.self) { station in
+                    ForEach(searchResults, id: \.self) { station in
                         Button {
                             selectedStation = station.title ?? ""
                             selectedStationCode = station.codes?.yandex_code ?? ""
@@ -67,9 +78,7 @@ struct SelectStationView: View {
                 }
             }
         }
-        .onAppear {
-            viewModel.fetchStations()
-        }
+
     }
 }
 
@@ -84,6 +93,6 @@ struct SelectStationView: View {
     let service = AllStationsService(client: client)
     
     NavigationStack {
-        SelectStationView(service: service, selectedStation: .constant(""), selectedStationCode: .constant(""))
+        SelectStationView(stations: [], selectedStation: .constant(""), selectedStationCode: .constant(""))
     }
 }

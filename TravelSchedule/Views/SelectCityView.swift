@@ -54,7 +54,7 @@ struct SelectCityView: View {
                                             .foregroundColor(.primary)
                                     }
                                     NavigationLink {
-                                        SelectStationView(service: viewModel.stationsService, selectedStation: $selectedStation, selectedStationCode: $selectedStationCode)
+                                        SelectStationView(stations: city.stations ?? [], selectedStation: $selectedStation, selectedStationCode: $selectedStationCode)
                                     } label: {
 
                                         Color.clear

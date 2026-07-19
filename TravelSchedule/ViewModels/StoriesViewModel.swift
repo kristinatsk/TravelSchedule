@@ -14,7 +14,7 @@ final class StoriesViewModel {
         self.currentStoryIndex = currentStoryIndex
         self.currentProgress = currentProgress
         self.storiesCount = storiesCount
-        self.timer = Self.makeTimer(configuration: self.timerConfiguration)
+        timer = Self.makeTimer(configuration: TimerConfiguration(storiesCount: storiesCount))
     }
     
     func didChangeCurrentIndex(oldIndex: Int, newIndex: Int) {
