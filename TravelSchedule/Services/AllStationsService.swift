@@ -8,8 +8,8 @@ protocol AllStationsServiceProtocol {
     func getAllStations() async throws -> AllStations
 }
 
-final class AllStationsService: AllStationsServiceProtocol {
-    
+actor AllStationsService: AllStationsServiceProtocol {
+    private let jsonDecoder = JSONDecoder()
     private let client: Client
     
     init(client: Client) { self.client = client }
@@ -17,15 +17,20 @@ final class AllStationsService: AllStationsServiceProtocol {
     func getAllStations() async throws -> AllStations {
         let response = try await client.getAllStations(query: .init())
         
-        let responseBody = try response.ok.body.html
+        let responseBody = try await response.ok.body.html
         
         let limit = 50 * 1024 * 1024
         
-        var fullData = try await Data(collecting: responseBody, upTo: limit)
+        let fullData = try await Data(collecting: responseBody, upTo: limit)
+       
+        let allStations = try await MainActor.run {
+            return try jsonDecoder.decode(AllStations.self, from: fullData)
+        }
         
-        let allStations = try JSONDecoder().decode(AllStations.self, from: fullData)
         
         
         return allStations
     }
 }
+
+

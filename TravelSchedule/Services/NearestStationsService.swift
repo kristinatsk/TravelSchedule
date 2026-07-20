@@ -7,7 +7,7 @@ protocol NearestStationsServiceProtocol {
     func getNearestStations(lat: Double, lng: Double, distance: Int) async throws -> NearestStations
 }
 
-final class NearestStationsService: NearestStationsServiceProtocol {
+actor NearestStationsService: NearestStationsServiceProtocol {
     
     private let client: Client
     
@@ -22,7 +22,7 @@ final class NearestStationsService: NearestStationsServiceProtocol {
             distance: distance
         ))
         
-        return try response.ok.body.json
+        return try await response.ok.body.json
     }
     
     

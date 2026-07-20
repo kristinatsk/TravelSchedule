@@ -1,53 +1,45 @@
 import SwiftUI
 
 struct StoriesView: View {
-    private var timerConfiguration: TimerConfiguration { .init(storiesCount: stories.count)}
     @Environment(\.dismiss) var dismiss
-    @State private var currentStoryIndex: Int
-    @State private var currentProgress: CGFloat = 0
+    @State private var viewModel: StoriesViewModel
     @Binding var stories: [Story]
     
-    init(stories: Binding<[Story]>, initialIndex: Int) {
+    init(
+        stories: Binding<[Story]>,
+        initialIndex: Int
+    ) {
         self._stories = stories
-        self._currentStoryIndex = State(initialValue: initialIndex)
+        self._viewModel = State(initialValue: StoriesViewModel(currentStoryIndex: initialIndex, currentProgress: 0, storiesCount: stories.wrappedValue.count))
     }
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            StoriesTabView(stories: stories, currentStoryIndex: $currentStoryIndex)
-                .onChange(of: currentStoryIndex) { oldValue, newValue in
-                    didChangeCurrentIndex(oldIndex: oldValue, newIndex: newValue)
-                    markStoryAsSeen(at: currentStoryIndex)
+            StoriesTabView(stories: stories, currentStoryIndex: $viewModel.currentStoryIndex)
+                .onChange(of: viewModel.currentStoryIndex) { oldValue, newValue in
+                    viewModel.didChangeCurrentIndex(oldIndex: oldValue, newIndex: newValue)
+                    markStoryAsSeen(at: viewModel.currentStoryIndex)
                 }
             CloseButton(action: { dismiss() })
                 .padding(.top, 57)
                 .padding(.trailing, 12)
             StoriesProgressBar(
-                storiesCount: stories.count,
-                timerConfiguration: timerConfiguration,
-                currentProgress: $currentProgress
+                currentProgress: $viewModel.currentProgress,
+                storiesCount: stories.count
             )
             .padding(.init(top: 28, leading: 12, bottom: 12, trailing: 12))
-            .onChange(of: currentProgress) { _, newValue in
-                didChangeCurrentProgress(newProgress: newValue)
+            .onChange(of: viewModel.currentProgress) { _, newValue in
+                viewModel.didChangeCurrentProgress(newProgress: newValue)
             }
         }
-    }
-    
-    private func didChangeCurrentIndex(oldIndex: Int, newIndex: Int) {
-        guard oldIndex != newIndex else { return }
-        let progress = timerConfiguration.progress(for: newIndex)
-        guard abs(progress - currentProgress) >= 0.01 else { return }
-        withAnimation {
-            currentProgress = progress
+        .onAppear {
+            viewModel.startTimer()
         }
-    }
-    
-    private func didChangeCurrentProgress(newProgress: CGFloat) {
-        let index = timerConfiguration.index(for: newProgress)
-        guard index != currentStoryIndex else { return }
-        withAnimation {
-            currentStoryIndex = index
+        .onDisappear {
+            viewModel.stopTimer()
+        }
+        .onReceive(viewModel.timer) { _ in
+            viewModel.timerTick()
         }
     }
     

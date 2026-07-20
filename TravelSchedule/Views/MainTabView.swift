@@ -9,9 +9,9 @@ struct MainTabView: View {
     var body: some View {
         TabView() {
             RouteSearchView(
+                stationsService: stationsService,
                 carrierInfoService: carrierInfoService,
-                scheduleBetweenStationsService: scheduleBetweenStationsService,
-                stationsService: stationsService
+                scheduleBetweenStationsService: scheduleBetweenStationsService
             )
             .tabItem {
                 Image(.mainItem)

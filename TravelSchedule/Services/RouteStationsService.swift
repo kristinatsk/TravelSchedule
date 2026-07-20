@@ -7,7 +7,7 @@ protocol RouteStationsServiceProtocol {
     func getRouteStations(uid: String) async throws -> RouteStations
 }
 
-final class RouteStationsService: RouteStationsServiceProtocol {
+actor RouteStationsService: RouteStationsServiceProtocol {
     private let client: Client
     
     init(client: Client) { self.client = client }
@@ -15,6 +15,6 @@ final class RouteStationsService: RouteStationsServiceProtocol {
     func getRouteStations(uid: String) async throws -> RouteStations {
         let response = try await client.getRouteStations(query: .init(uid: uid))
         
-        return try response.ok.body.json
+        return try await response.ok.body.json
     }
 }

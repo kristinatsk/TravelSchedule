@@ -7,7 +7,7 @@ protocol CarrierInfoServiceProtocol {
     func getCarrierInfo(code: String) async throws -> CarrierInfo
 }
 
-final class CarrierInfoService: CarrierInfoServiceProtocol {
+actor CarrierInfoService: CarrierInfoServiceProtocol {
     private let client: Client
     
     init(client: Client) {
@@ -17,6 +17,6 @@ final class CarrierInfoService: CarrierInfoServiceProtocol {
     func getCarrierInfo(code: String) async throws -> CarrierInfo {
         let response = try await client.getCarrierInfo(query: .init(code: code))
         
-        return try response.ok.body.json
+        return try await response.ok.body.json
     }
 }

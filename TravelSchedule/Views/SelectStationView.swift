@@ -8,13 +8,22 @@ struct SelectStationView: View {
     @Binding var selectedStationCode: String
     
     let stations: [Components.Schemas.Station]
+    
+    
+    init(stations: [Components.Schemas.Station], selectedStation: Binding<String>, selectedStationCode: Binding<String>) {
+        self.stations = stations
+        self._selectedStation = selectedStation
+        self._selectedStationCode = selectedStationCode
+    }
+    
     var searchResults: [Components.Schemas.Station] {
         if searchText.isEmpty {
             stations
         } else {
-            stations.filter { station in (station.title ?? "").localizedCaseInsensitiveContains(searchText)}
+            stations.filter { station in (station.title ?? "").localizedCaseInsensitiveContains(searchText) }
         }
     }
+    
     var body: some View {
         VStack {
             HStack {
@@ -69,9 +78,21 @@ struct SelectStationView: View {
                 }
             }
         }
+
     }
 }
 
 #Preview {
-    SelectStationView(selectedStation: .constant(""), selectedStationCode: .constant(""), stations: [])
+    let safeURL = URL(string: "https://yandex.ru")!
+    
+    let client = Client(
+        serverURL: safeURL,
+        transport: URLSessionTransport(),
+        middlewares: [AuthenticationMiddleware(apikey: "e0940f60-7b86-40f1-ba94-6a70f7d38166")]
+    )
+    let service = AllStationsService(client: client)
+    
+    NavigationStack {
+        SelectStationView(stations: [], selectedStation: .constant(""), selectedStationCode: .constant(""))
+    }
 }

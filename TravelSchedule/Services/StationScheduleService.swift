@@ -7,7 +7,7 @@ protocol StationScheduleServiceProtocol {
     func getStationSchedule(station: String) async throws -> StationSchedule
 }
 
-final class StationScheduleService: StationScheduleServiceProtocol {
+actor StationScheduleService: StationScheduleServiceProtocol {
     private let client: Client
     
     init(client: Client) { self.client = client }
@@ -17,7 +17,7 @@ final class StationScheduleService: StationScheduleServiceProtocol {
             station: station
         ))
         
-        return try response.ok.body.json
+        return try await response.ok.body.json
     }
    
 }

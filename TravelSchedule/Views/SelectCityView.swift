@@ -3,33 +3,29 @@ import OpenAPIURLSession
 
 struct SelectCityView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var searchText = ""
-    @State private var settlements: [Components.Schemas.Settlement] = []
-    @State private var currentViewState: ViewState = .loading
+    @State private var viewModel: CitiesViewModel
     @Binding var selectedStation: String
     @Binding var selectedStationCode: String
     
-    let stationsService: AllStationsService
-    var searchResults: [Components.Schemas.Settlement] {
-        if searchText.isEmpty {
-            settlements
-        } else {
-            settlements.filter { city in (city.title ?? "").localizedCaseInsensitiveContains(searchText)}
-        }
+    init(service: AllStationsServiceProtocol, selectedStation: Binding<String>, selectedStationCode: Binding<String>) {
+        self._viewModel = State(initialValue: CitiesViewModel(stationsService: service))
+        self._selectedStation = selectedStation
+        self._selectedStationCode = selectedStationCode
     }
+    
     var body: some View {
         Group {
-            switch currentViewState {
+            switch viewModel.currentViewState {
             case .loading:
                 ProgressView()
             case .success:
                 VStack {
                     HStack {
                         Image(systemName: Constants.Icons.magnifyingGlass)
-                        TextField("Введите запрос", text: $searchText)
-                        if !searchText.isEmpty {
+                        TextField("Введите запрос", text: $viewModel.searchText)
+                        if !viewModel.searchText.isEmpty {
                             Button {
-                                searchText = ""
+                                viewModel.searchText = ""
                             } label: {
                                 Image(systemName: Constants.Icons.xmark)
                                     .foregroundColor(.grayUniversal)
@@ -40,7 +36,7 @@ struct SelectCityView: View {
                     .background(.searchBarBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .padding(.horizontal)
-                    if !searchText.isEmpty && searchResults.isEmpty {
+                    if !viewModel.searchText.isEmpty && viewModel.searchResults.isEmpty {
                         Spacer()
                         
                         Text("Город не найден")
@@ -48,7 +44,7 @@ struct SelectCityView: View {
                         Spacer()
                     } else {
                         List {
-                            ForEach(searchResults, id: \.self) { city in
+                            ForEach(viewModel.searchResults, id: \.self) { city in
                                 ZStack {
                                     HStack {
                                         Text(city.title ?? "")
@@ -58,7 +54,7 @@ struct SelectCityView: View {
                                             .foregroundColor(.primary)
                                     }
                                     NavigationLink {
-                                        SelectStationView(selectedStation: $selectedStation, selectedStationCode: $selectedStationCode, stations: city.stations ?? [])
+                                        SelectStationView(stations: city.stations ?? [], selectedStation: $selectedStation, selectedStationCode: $selectedStationCode)
                                     } label: {
 
                                         Color.clear
@@ -106,28 +102,7 @@ struct SelectCityView: View {
             }
         }
         .task {
-            do {
-                let response = try await stationsService.getAllStations()
-                var fetchedCities: [Components.Schemas.Settlement] = []
-                for country in response.countries ?? [] {
-                    for region in country.regions ?? [] {
-                        for settlement in region.settlements ?? [] {
-                            if let cityName = settlement.title, let settleName = settlement.stations {
-                                fetchedCities.append(settlement)
-                            }
-                        }
-                    }
-                }
-                settlements = fetchedCities
-                currentViewState = .success
-            } catch {
-                if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                    currentViewState = .noInternet
-                } else {
-                    currentViewState = .serverError
-                }
-                print(error.localizedDescription)
-            }
+            viewModel.fetchCities()
         }
         
         .onChange(of: selectedStation) { oldValue, newValue in
@@ -138,13 +113,9 @@ struct SelectCityView: View {
 
 
 #Preview {
-    let safeURL: URL
     
-    do {
-        safeURL = try Servers.Server1.url()
-    } catch {
-        safeURL = URL(string: "https://yandex.ru")!
-    }
+    let safeURL = URL(string: "https://yandex.ru")!
+    
     let client = Client(
         serverURL: safeURL,
         transport: URLSessionTransport(),
@@ -152,8 +123,8 @@ struct SelectCityView: View {
     )
     let service = AllStationsService(client: client)
     
-    return NavigationStack {
-        SelectCityView(selectedStation: .constant(""), selectedStationCode: .constant(""),stationsService: service)
+    NavigationStack {
+        SelectCityView(service: service, selectedStation: .constant(""), selectedStationCode: .constant(""))
     }
     
 }

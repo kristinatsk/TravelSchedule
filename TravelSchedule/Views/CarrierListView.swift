@@ -9,54 +9,45 @@ enum ViewState {
 }
 
 struct CarrierListView: View {
-    
-    let selectedDepartureStation: String
-    let selectedArrivalStation: String
-    let departureCode: String
-    let arrivalCode: String
-    let scheduleBetweenStationsService: ScheduleBetweenStationsService
-    
     @Environment(\.dismiss) var dismiss
-    @State private var segments: [Components.Schemas.Segment] = []
-    @State private var selectedTimes: Set<DepartureTime> = []
-    @State private var showTransfers: Bool = true
-    @State private var currentViewState: ViewState = .loading
+    @State private var viewModel: CarrierListViewModel
     
-    var filteredSegments: [Components.Schemas.Segment] {
-        segments.filter { segment in
-            let matchTransfers = showTransfers ? true : ((segment.has_transfers ?? false) == false)
-            var matchTime = true
-            if !selectedTimes.isEmpty {
-                if let category = getDepartureTime(from: segment.departure ?? "") {
-                    matchTime = selectedTimes.contains(category)
-                } else {
-                    matchTime = false
-                }
-                
-            }
-            return matchTransfers && matchTime
-        }
+    init(
+        scheduleBetweenStationsService: ScheduleBetweenStationsServiceProtocol,
+        selectedDepartureStation: String,
+        selectedArrivalStation: String,
+        departureCode: String,
+        arrivalCode: String
+    ) {
+        self._viewModel = State(
+            initialValue: CarrierListViewModel(
+                selectedDepartureStation: selectedDepartureStation,
+                selectedArrivalStation: selectedArrivalStation,
+                departureCode: departureCode,
+                arrivalCode: arrivalCode,
+                scheduleBetweenStationsService: scheduleBetweenStationsService
+            ))
     }
     
     var body: some View {
         Group {
-            switch currentViewState {
+            switch viewModel.currentViewState {
             case .loading:
                 ProgressView()
             case .success:
                 VStack {
-                    Text("\(selectedDepartureStation) -> \(selectedArrivalStation)")
+                    Text("\(viewModel.selectedDepartureStation) -> \(viewModel.selectedArrivalStation)")
                         .font(.system(size: 24, weight: .bold))
                         .padding(16)
                     ZStack(alignment: .bottom) {
-                        if filteredSegments.isEmpty {
+                        if viewModel.filteredSegments.isEmpty {
                             Text("Вариантов нет")
                                 .font(.system(size: 24, weight: .bold))
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                         } else {
                             ScrollView {
                                 VStack (spacing: 8) {
-                                    ForEach(filteredSegments, id: \.self) { segment in
+                                    ForEach(viewModel.filteredSegments, id: \.self) { segment in
                                         if let carrier = segment.thread?.carrier {
                                             NavigationLink {
                                                 CarrierDetailView(carrier: carrier)
@@ -90,20 +81,20 @@ struct CarrierListView: View {
                                                             .font(.system(size: 12, weight: .regular))
                                                     }
                                                     HStack {
-                                                        Text(formatTime(serverDate: segment.departure ?? ""))
+                                                        Text(viewModel.formatTime(serverDate: segment.departure ?? ""))
                                                             .foregroundColor(.black)
                                                             .font(.system(size: 17, weight: .regular))
                                                         Rectangle()
                                                             .frame(height: 1)
                                                             .foregroundColor(.black)
                                                         
-                                                        Text(formatDuration(seconds: segment.duration ?? 0))
+                                                        Text(viewModel.formatDuration(seconds: segment.duration ?? 0))
                                                             .font(.system(size: 12, weight: .regular))
                                                         Rectangle()
                                                             .frame(height: 1)
                                                             .foregroundColor(.black)
                                                         
-                                                        Text(formatTime(serverDate: segment.arrival ?? ""))
+                                                        Text(viewModel.formatTime(serverDate: segment.arrival ?? ""))
                                                             .font(.system(size: 17, weight: .regular))
                                                         
                                                     }
@@ -124,13 +115,13 @@ struct CarrierListView: View {
                         
                         NavigationLink {
                             FilterView(
-                                selectedTimes: $selectedTimes,
-                                showTransfers: $showTransfers
+                                selectedTimes: $viewModel.selectedTimes,
+                                showTransfers: $viewModel.showTransfers
                             )
                         } label: {
                             HStack {
                                 Text("Уточнить время")
-                                if !showTransfers || !selectedTimes.isEmpty {
+                                if !viewModel.showTransfers || !viewModel.selectedTimes.isEmpty {
                                     Circle().fill(.redUniversal).frame(width: 8, height: 8)
                                 }
                                 
@@ -181,45 +172,7 @@ struct CarrierListView: View {
             }
         }
         .task {
-            do {
-                let response = try await scheduleBetweenStationsService.getScheduleBetweenStations(from: departureCode, to: arrivalCode)
-                let fetchedSegments = response.segments
-                segments = fetchedSegments ?? []
-                currentViewState = .success
-            } catch {
-                if let urlError = error as? URLError, urlError.code == .notConnectedToInternet {
-                    currentViewState = .noInternet
-                } else {
-                    currentViewState = .serverError
-                }
-                print(error.localizedDescription)
-            }
-        }
-    }
-    
-    func formatTime(serverDate: String) -> String {
-        return String(serverDate.prefix(5))
-    }
-    
-    func formatDuration(seconds: Int) -> String {
-        let hours = seconds / 3600
-        
-        return "\(hours) часов"
-    }
-    
-    func getDepartureTime(from departureString: String) -> DepartureTime? {
-        let hourString = String(departureString.prefix(2))
-        guard let hour = Int(hourString) else { return nil }
-        switch hour {
-        case 0...5:
-            return DepartureTime.night
-        case 6...11:
-            return DepartureTime.morning
-        case 12...17:
-            return DepartureTime.afternoon
-        case 18...23:
-            return DepartureTime.evening
-        default: return nil
+            viewModel.fetchedRoutes()
         }
     }
 }
@@ -238,10 +191,10 @@ struct CarrierListView: View {
     let scheduleService = ScheduleBetweenStationsService(client: client)
     
     CarrierListView(
+        scheduleBetweenStationsService: scheduleService,
         selectedDepartureStation: "Москва",
         selectedArrivalStation: "Санкт-Петербург",
         departureCode: "c146",
-        arrivalCode: "c213",
-        scheduleBetweenStationsService: scheduleService
+        arrivalCode: "c213"
     )
 }
