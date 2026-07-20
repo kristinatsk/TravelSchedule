@@ -9,7 +9,7 @@ protocol AllStationsServiceProtocol {
 }
 
 actor AllStationsService: AllStationsServiceProtocol {
-    
+    private let jsonDecoder = JSONDecoder()
     private let client: Client
     
     init(client: Client) { self.client = client }
@@ -24,7 +24,7 @@ actor AllStationsService: AllStationsServiceProtocol {
         let fullData = try await Data(collecting: responseBody, upTo: limit)
        
         let allStations = try await MainActor.run {
-            return try JSONDecoder().decode(AllStations.self, from: fullData)
+            return try jsonDecoder.decode(AllStations.self, from: fullData)
         }
         
         
